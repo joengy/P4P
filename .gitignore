@@ -30,8 +30,36 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# ── secrets / backend credentials ──────────────────────────────
+# Every env file stays local. .env.example is the only one committed,
+# and it must contain placeholder values only.
+.env
+.env.*
+!.env.example
+
+# Supabase access tokens, linked-project ref, local stack state
+.supabase/
+supabase/.branches/
+supabase/.temp/
+
+# Local MCP server config — points at the live backend project
+.mcp.json
+
+# Misc credential shapes
+*.keystore
+*.cer
+credentials.json
+google-services.json
+GoogleService-Info.plist
+service-account*.json
+
+# ── docs / internal notes ──────────────────────────────────────
+# No markdown in the repo except the README.
+*.md
+!README.md
+
+# One-off database dumps (the real schema lives in supabase/migrations/)
+hoa_schema_export.sql
 
 # typescript
 *.tsbuildinfo
