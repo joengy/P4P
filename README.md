@@ -3,8 +3,8 @@
 A bilingual (EN / 中文) movement and wellbeing app built with Expo and React Native.
 
 Screens are file-based routes under [app/](app/), content is served through React Query
-hooks in [data/queries.ts](data/queries.ts), and auth plus the Postgres schema live in
-Supabase.
+hooks in [data/queries.ts](data/queries.ts), and the Postgres schema lives in Supabase.
+There is no sign-in step yet — the app runs entirely off the mock data layer.
 
 ---
 
@@ -33,8 +33,14 @@ npm install
 
 ## 2. Configure the backend
 
-The app talks to Supabase for authentication and data. Copy the template and fill in
-your own project's values:
+> **There is no sign-in step right now.** The app opens straight on the tabs and every
+> screen reads from the mock layer in [data/queries.ts](data/queries.ts), so you can run
+> it with no backend at all — this section only matters once Phase 3 starts reading real
+> data. The auth gate and the sign-in/sign-up screens were removed; restore them from git
+> history when per-user data lands.
+
+The app will talk to Supabase for data. Copy the template and fill in your own project's
+values:
 
 ```bash
 cp .env.example .env.local
@@ -57,9 +63,8 @@ Notes:
 - Restart the dev server after editing `.env.local` — env vars are read at bundle time,
   not on hot reload.
 
-Without valid credentials the app still builds, but [lib/supabase.ts](lib/supabase.ts)
-falls back to a placeholder URL and the auth gate in [app/_layout.tsx](app/_layout.tsx)
-will hold you on the sign-in screen, since no session can be established.
+Without valid credentials [lib/supabase.ts](lib/supabase.ts) falls back to a placeholder
+URL. Nothing reads from Supabase yet, so the app runs normally either way.
 
 ## 3. Set up the database
 
@@ -71,6 +76,7 @@ then optionally load the catalog seed data:
 | `0001_init.sql` | Tables, row-level security policies, indexes |
 | `0002_profile_trigger.sql` | Creates a `profiles` row on user signup |
 | `0003_lock_down_handle_new_user.sql` | Hardens the signup trigger |
+| `0004_vr_device_sessions.sql` | Bridge table to the Unity VR hike — queued sessions + completions |
 | `seed.sql` | Public catalog content — activities, VR sessions, plans, circle ideas |
 
 The quickest route is the SQL editor in the Supabase dashboard: paste each file's
@@ -102,7 +108,7 @@ code with Expo Go on a physical device. You can also jump straight to a platform
 | `npm run android` | Starts and opens the Android emulator |
 | `npm run web` | Starts and opens the web build |
 
-Create an account on the sign-up screen to get past the auth gate.
+The app opens straight on the Home tab — there is no sign-in step.
 
 ---
 
@@ -110,7 +116,6 @@ Create an account on the sign-up screen to get past the auth gate.
 
 ```
 app/                    Expo Router screens — every file is a route
-  (auth)/               sign-in, sign-up — the ungated route group
   (tabs)/               the five tab screens (home, discover, move, plan, you)
   activity/ vr/ plan/   stack + modal detail routes
   fit/ ask/ session/
@@ -124,8 +129,7 @@ data/
   mock/                 in-memory fixtures backing those hooks
 i18n/                   i18next setup + en/zh locale JSON
 lib/
-  supabase.ts           Supabase client
-  auth.tsx              AuthProvider / useAuth
+  supabase.ts           Supabase client (not read by any screen yet)
   L.ts                  Bilingual<T> resolver — L(node, lang)
 store/saved.ts          Zustand store for saved items, persisted to AsyncStorage
 supabase/               SQL migrations and seed data
@@ -133,8 +137,8 @@ supabase/               SQL migrations and seed data
 
 ### Conventions worth knowing
 
-- **Path alias.** `@/*` maps to the repo root, so imports read `@/lib/auth`, not
-  `../../lib/auth`. Configured in [tsconfig.json](tsconfig.json).
+- **Path alias.** `@/*` maps to the repo root, so imports read `@/lib/supabase`, not
+  `../../lib/supabase`. Configured in [tsconfig.json](tsconfig.json).
 - **Typed routes** are on (`experiments.typedRoutes` in [app.json](app.json)), so route
   strings are type-checked. Run the dev server once after adding a route to regenerate
   the types.

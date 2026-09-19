@@ -6,20 +6,21 @@ import { Card, Segmented, Icon } from '@/components/ui';
 import { colors, toneColors, radii, fonts, type Tone } from '@/constants/theme';
 import { L } from '@/lib/L';
 import { useLang } from '@/i18n/useLang';
-import { HISTORY, TYPE_META, INTENSITY, rangeRead } from '@/data/mock';
+import { TYPE_META, INTENSITY, rangeRead } from '@/data/mock';
 import type { HistoryItem } from '@/data/mock';
+import { useHistory } from '@/data/queries';
 
 const CHART_H = 158;
 
 type Range = 'week' | 'month' | 'all';
 type Bucket = { key: string; label: string; mins: number; sessions: HistoryItem[]; isNow: boolean };
 
-function buildBuckets(range: Range): Bucket[] {
+function buildBuckets(range: Range, history: HistoryItem[]): Bucket[] {
   if (range === 'week') {
     const letters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
     return Array.from({ length: 7 }, (_, i) => {
       const day = 6 - i;
-      const sessions = HISTORY.filter((h) => h.daysAgo === day);
+      const sessions = history.filter((h) => h.daysAgo === day);
       return { key: 'd' + day, label: letters[i], mins: sessions.reduce((s, h) => s + h.min, 0), sessions, isNow: day === 0 };
     });
   }
@@ -28,7 +29,7 @@ function buildBuckets(range: Range): Bucket[] {
     const wk = weeks - 1 - i;
     const lo = wk * 7;
     const hi = lo + 6;
-    const sessions = HISTORY.filter((h) => h.daysAgo >= lo && h.daysAgo <= hi);
+    const sessions = history.filter((h) => h.daysAgo >= lo && h.daysAgo <= hi);
     return { key: 'w' + wk, label: wk === 0 ? '·' : wk + 'w', mins: sessions.reduce((s, h) => s + h.min, 0), sessions, isNow: wk === 0 };
   });
 }
@@ -163,8 +164,11 @@ export function RhythmHero() {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [panel, setPanel] = useState<'where' | 'history' | null>(null);
 
+  // Mock history plus anything completed in the VR headset — see useHistory.
+  const { data: history = [] } = useHistory();
+
   const cutoff = range === 'week' ? 7 : range === 'month' ? 30 : 9999;
-  const items = HISTORY.filter((h) => h.daysAgo <= cutoff);
+  const items = history.filter((h) => h.daysAgo <= cutoff);
   const sessions = items.length;
   const mins = items.reduce((s, h) => s + h.min, 0);
   const kcal = items.reduce((s, h) => s + h.kcal, 0);
@@ -175,7 +179,7 @@ export function RhythmHero() {
   const readTone: Tone = sessions === 0 ? 'lav' : sessions <= 2 ? 'lav' : sessions <= 5 ? 'calm' : 'accent';
   const readColors = toneColors(readTone);
 
-  const buckets = buildBuckets(range);
+  const buckets = buildBuckets(range, history);
   const peak = Math.max(...buckets.map((b) => b.mins), 30);
   const activeDays = buckets.filter((b) => b.mins > 0).length;
   const avg = activeDays ? Math.round(buckets.reduce((s, b) => s + b.mins, 0) / activeDays) : 0;

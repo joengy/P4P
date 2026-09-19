@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { HOME_REC_LIBRARY, VR_SESSIONS, DISCOVER_ITEMS, CONFIRMED, CIRCLE_IDEAS, HISTORY, CONVERSATIONS } from './mock';
+import { useDeviceStore } from '@/store/device';
+import { fetchVrCompletions, completionToHistoryItem } from '@/lib/vrBridge';
 
 // React Query wrappers around the in-memory mock arrays. Phase 3 swaps the
 // queryFn bodies for Supabase calls (`supabase.from('activities').select()`
@@ -80,10 +82,29 @@ export function useCircleIdea(id: string | null | undefined) {
   });
 }
 
+// The one hook already reading real data: hikes completed in the VR game come
+// back from Supabase and sit in front of the mock history.
+//
+// ponytail: real rows are prepended to the mock array rather than replacing it,
+// so the You tab's chart still has a body of history to draw during the study.
+// Drop the `...HISTORY` tail once there is enough real data to stand alone.
 export function useHistory() {
+  // Subscribed rather than read via getState(): zustand's persist middleware
+  // rehydrates from AsyncStorage asynchronously, so the code is still null on
+  // the first render. Keying the query on it refetches once it arrives.
+  const deviceCode = useDeviceStore((s) => s.code);
   return useQuery({
-    queryKey: ['history'],
-    queryFn: async () => HISTORY,
+    queryKey: ['history', deviceCode],
+    queryFn: async () => {
+      if (!deviceCode) return HISTORY;
+      try {
+        const rows = await fetchVrCompletions(deviceCode);
+        return [...rows.map(completionToHistoryItem), ...HISTORY];
+      } catch {
+        // An unreachable backend shouldn't empty the You tab.
+        return HISTORY;
+      }
+    },
   });
 }
 

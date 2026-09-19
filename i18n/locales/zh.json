@@ -95,7 +95,17 @@
     "vrToReal": "你在 VR 里试过",
     "vrToRealSub": "附近有一段相似的真实步行——美琳温和地带领。",
     "beforeVr": "VR 之前",
-    "afterVr": "VR 之后"
+    "afterVr": "VR 之后",
+    "pairTitle": "连接你的头显",
+    "pairBody": "戴上头显并打开徒步应用，将欢迎界面上的代码输入这里。之后你在手机上选择的课程，戴上头显时就已准备好。",
+    "pairPlaceholder": "ABC123",
+    "pairCta": "连接",
+    "pairCurrent": "已连接的头显",
+    "pairForget": "断开此头显",
+    "pairFirst": "连接头显",
+    "sentToHeadset": "已在头显中准备好",
+    "sentToHeadsetHint": "戴上头显即可开始，节奏已按你的选择设定好。",
+    "sendFailed": "无法连接到头显。请检查网络后重试。"
   },
   "discover": {
     "discoverTitle": "找到下一步",

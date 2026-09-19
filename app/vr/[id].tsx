@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,8 @@ import { colors, fonts } from '@/constants/theme';
 import { L } from '@/lib/L';
 import { useLang } from '@/i18n/useLang';
 import { useSavedStore } from '@/store/saved';
+import { useDeviceStore } from '@/store/device';
+import { queueVrSession } from '@/lib/vrBridge';
 import { useVrSession } from '@/data/queries';
 
 function SafetyRow({ icon, label }: { icon: 'check' | 'x' | 'pin' | 'heart'; label: string }) {
@@ -26,9 +28,39 @@ export default function VrDetailScreen() {
   const { lang } = useLang();
   const saved = useSavedStore((s) => s.isSaved(id));
   const toggleSaved = useSavedStore((s) => s.toggleSaved);
+  const deviceCode = useDeviceStore((s) => s.code);
   const { data: v } = useVrSession(id);
+  const [queue, setQueue] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
   const onClose = () => router.back();
+
+  let startLabel = t('move.startSession');
+  if (queue === 'sent') startLabel = t('move.sentToHeadset');
+  else if (!deviceCode) startLabel = t('move.pairFirst');
+
+  // Hands the session to the paired headset. The player still confirms the
+  // check-in in VR — this only pre-fills it, so there is nothing to wait for
+  // here. Unpaired phones get sent to the pairing sheet first.
+  const onStart = async () => {
+    if (!v) return;
+    if (!deviceCode) {
+      router.push('/pair');
+      return;
+    }
+    setQueue('sending');
+    try {
+      await queueVrSession({
+        deviceCode,
+        vrSessionRef: v.id,
+        title: v.title,
+        mode: v.feltIntensity,
+        minutes: v.min,
+      });
+      setQueue('sent');
+    } catch {
+      setQueue('error');
+    }
+  };
   if (!v) {
     return (
       <Sheet onClose={onClose}>
@@ -103,11 +135,25 @@ export default function VrDetailScreen() {
           ))}
         </View>
 
-        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-          <View style={{ flex: 1 }}>
-            <Btn full>{t('move.startSession')}</Btn>
+        <View style={{ gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+            <View style={{ flex: 1 }}>
+              <Btn full onPress={onStart} disabled={queue === 'sending'}>
+                {startLabel}
+              </Btn>
+            </View>
+            <SaveButton saved={saved} onToggle={() => toggleSaved(v.id)} />
           </View>
-          <SaveButton saved={saved} onToggle={() => toggleSaved(v.id)} />
+          {queue === 'sent' && (
+            <Text style={{ fontSize: 12.5, color: colors.muted, textAlign: 'center' }}>
+              {t('move.sentToHeadsetHint')}
+            </Text>
+          )}
+          {queue === 'error' && (
+            <Text style={{ fontSize: 12.5, color: colors.accentInk, textAlign: 'center' }}>
+              {t('move.sendFailed')}
+            </Text>
+          )}
         </View>
       </View>
     </Sheet>

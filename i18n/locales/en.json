@@ -95,7 +95,17 @@
     "vrToReal": "You tried this in VR",
     "vrToRealSub": "A similar real-world walk is nearby — Mei-Lin guides it gently.",
     "beforeVr": "Before VR",
-    "afterVr": "After VR"
+    "afterVr": "After VR",
+    "pairTitle": "Connect your headset",
+    "pairBody": "Put on the headset and open the hike. The code on its welcome panel goes here — then sessions you pick on your phone are ready and waiting when you put it on.",
+    "pairPlaceholder": "ABC123",
+    "pairCta": "Connect",
+    "pairCurrent": "CONNECTED HEADSET",
+    "pairForget": "Disconnect this headset",
+    "pairFirst": "Connect a headset",
+    "sentToHeadset": "Ready in your headset",
+    "sentToHeadsetHint": "Put on the headset — this session will be waiting, already set to your pace.",
+    "sendFailed": "Couldn't reach your headset. Check your connection and try again."
   },
   "discover": {
     "discoverTitle": "Find your next move",

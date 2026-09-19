@@ -78,6 +78,7 @@ export default function RootLayout() {
                   <Stack.Screen name="session/[id]" options={{ presentation: 'transparentModal' }} />
                   <Stack.Screen name="share/[id]" options={{ presentation: 'transparentModal' }} />
                   <Stack.Screen name="mood" options={{ presentation: 'transparentModal' }} />
+                  <Stack.Screen name="pair" options={{ presentation: 'transparentModal' }} />
                 </Stack>
               </View>
             </BottomSheetModalProvider>
