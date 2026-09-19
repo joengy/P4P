@@ -99,7 +99,13 @@ export default function ActivityDetailScreen() {
           </Btn>
 
           {rec.groupChatId && (
-            <Btn full ghost onPress={() => router.push({ pathname: '/messages/[id]', params: { id: rec.groupChatId! } })}>
+            <Btn
+              full
+              ghost
+              onPress={() =>
+                router.push({ pathname: '/messages/[id]', params: { id: rec.groupChatId!, from: `/activity/${rec.id}` } })
+              }
+            >
               {t('social.openGroupChat')}
             </Btn>
           )}

@@ -163,7 +163,9 @@ export default function PlanDetailScreen() {
 
         {plan.groupChatId && (
           <Pressable
-            onPress={() => router.push(`/messages/${plan.groupChatId}`)}
+            onPress={() =>
+              router.push({ pathname: '/messages/[id]', params: { id: plan.groupChatId!, from: `/plan/${plan.id}` } })
+            }
             style={{ flexDirection: 'row', alignItems: 'center', gap: 8, width: '100%', paddingVertical: 12, paddingHorizontal: 14, borderRadius: radii.pill, backgroundColor: colors.calmSoft }}
           >
             <Icon name="chat" size={16} stroke={colors.calmInk} sw={2} />
@@ -178,7 +180,10 @@ export default function PlanDetailScreen() {
         )}
 
         <Pressable
-          onPress={() => plan.groupChatId && router.push(`/messages/${plan.groupChatId}`)}
+          onPress={() =>
+            plan.groupChatId &&
+            router.push({ pathname: '/messages/[id]', params: { id: plan.groupChatId, from: `/plan/${plan.id}` } })
+          }
           style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, width: '100%', paddingVertical: 11, paddingHorizontal: 14, borderRadius: radii.pill, backgroundColor: colors.surface2 }}
         >
           <Icon name="chat" size={15} stroke={colors.ink} sw={2} />

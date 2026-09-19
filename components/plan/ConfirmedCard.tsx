@@ -75,7 +75,9 @@ export function ConfirmedCard({ plan, status, onCycle }: { plan: ConfirmedPlan; 
 
       {plan.groupChatId && (
         <Pressable
-          onPress={() => router.push(`/messages/${plan.groupChatId}`)}
+          onPress={() =>
+            router.push({ pathname: '/messages/[id]', params: { id: plan.groupChatId!, from: '/plan' } })
+          }
           style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 13, backgroundColor: colors.calmSoft, borderTopWidth: 1, borderTopColor: colors.line }}
         >
           <Icon name="chat" size={15} stroke={colors.calmInk} sw={2} />

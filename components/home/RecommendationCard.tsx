@@ -64,18 +64,23 @@ export function RecommendationCard({ rec }: { rec: HomeRec }) {
           <Text style={{ fontSize: 13, color: colors.muted }}>{L(rec.sub, lang)}</Text>
         </View>
 
-        {rec.org && (
-          <View style={{ backgroundColor: colors.surface2, borderRadius: 12, padding: 12, gap: 4 }}>
-            <Text style={{ fontSize: 12.5 }}>
-              <Text style={{ color: colors.muted }}>{t('home.organisedBy')}: </Text>
-              <Text style={{ fontWeight: '700', color: colors.ink }}>{L(rec.org.name, lang)}</Text>
+        {/* Who runs it stays on the card, not only on the detail page — for a
+            woman deciding whether this feels safe to try, the organiser and the
+            language support are part of the first impression. */}
+        <View style={{ backgroundColor: colors.surface2, borderRadius: 12, padding: 12, gap: 4 }}>
+          <Text style={{ fontSize: 12.5 }}>
+            <Text style={{ color: colors.muted }}>{t('home.organisedBy')}: </Text>
+            <Text style={{ fontWeight: '700', color: colors.ink }}>
+              {rec.org ? L(rec.org.name, lang) : t('home.selfGuided')}
             </Text>
+          </Text>
+          {rec.org && (
             <Text style={{ fontSize: 12.5 }}>
               <Text style={{ color: colors.muted }}>{t('home.languageLabel')}: </Text>
               <Text style={{ fontWeight: '700', color: colors.ink }}>{rec.detail.language}</Text>
             </Text>
-          </View>
-        )}
+          )}
+        </View>
 
         <Section label={t('home.whyItFits')}>
           <Text style={{ fontSize: 14, lineHeight: 20, color: colors.ink }}>{L(rec.why, lang)}</Text>
@@ -100,7 +105,12 @@ export function RecommendationCard({ rec }: { rec: HomeRec }) {
               ) : null
             )}
           </View>
-          <Text style={{ fontSize: 12, color: colors.faint }}>{t('home.moreOnDetail')}</Text>
+          <Text
+            onPress={() => router.push(`/activity/${rec.id}`)}
+            style={{ fontSize: 12, fontWeight: '700', color: colors.accent }}
+          >
+            {t('home.moreOnDetail')} →
+          </Text>
         </View>
 
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>

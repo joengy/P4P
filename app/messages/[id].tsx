@@ -15,7 +15,7 @@ import { StickerTray } from '@/components/messages/StickerTray';
 import type { PhraseSticker } from '@/components/ui/Sticker';
 
 export default function ChatScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
@@ -27,6 +27,15 @@ export default function ChatScreen() {
   const scrollRef = useRef<ScrollView>(null);
 
   const isGroup = conv?.kind === 'group' || conv?.kind === 'family';
+
+  // A chat opened from a plan has to return to that plan, not to the Messages
+  // list — callers pass the screen they came from as `from`. dismissTo pops the
+  // stack back to it when it is still below us, and navigates there otherwise.
+  const goBack = () => {
+    if (from) router.dismissTo(from as never);
+    else if (router.canGoBack()) router.back();
+    else router.replace('/messages');
+  };
 
   const send = (payload: Partial<ChatMessage>) => {
     setMsgs((m) => [...m, { from: 'me', time: 'now', ...payload }]);
@@ -57,7 +66,7 @@ export default function ChatScreen() {
           borderBottomColor: colors.line,
         }}
       >
-        <Pressable onPress={() => router.back()} style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center' }}>
+        <Pressable onPress={goBack} style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center' }}>
           <Icon name="chev" size={19} stroke={colors.ink} style={{ transform: [{ rotate: '180deg' }] }} />
         </Pressable>
         <Avatar name={L(conv.name, lang)} size={38} idx={conv.idx} />
