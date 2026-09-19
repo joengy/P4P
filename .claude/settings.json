@@ -1,4 +1,12 @@
 {
+  "permissions": {
+    "allow": [
+      "mcp__plugin_ecc_chrome-devtools__list_console_messages",
+      "mcp__plugin_ecc_chrome-devtools__take_screenshot",
+      "mcp__plugin_ecc_chrome-devtools__evaluate_script",
+      "mcp__supabase__execute_sql"
+    ]
+  },
   "enabledPlugins": {
     "expo@claude-plugins-official": true
   }
