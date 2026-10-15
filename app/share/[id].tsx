@@ -7,16 +7,12 @@ import { Icon, Btn, Avatar } from '@/components/ui';
 import { colors, fonts } from '@/constants/theme';
 import { L } from '@/lib/L';
 import { useLang } from '@/i18n/useLang';
-import { useConversations } from '@/data/queries';
-import { HOME_REC_LIBRARY, DISCOVER_ITEMS, VR_SESSIONS } from '@/data/mock';
+import { useConversations, useResolveSaved } from '@/data/queries';
+import type { SavedResolved } from '@/data/mock';
 
-function titleForShareId(id: string) {
-  if (HOME_REC_LIBRARY[id]) return HOME_REC_LIBRARY[id].invite;
-  const vr = VR_SESSIONS.find((v) => v.id === id);
-  if (vr) return vr.title;
-  const disc = DISCOVER_ITEMS.find((d) => d.id === id);
-  if (disc) return disc.title;
-  return { en: '', zh: '' };
+function titleOf(resolved: SavedResolved | null) {
+  if (!resolved) return { en: '', zh: '' };
+  return resolved.kind === 'rec' ? resolved.item.invite : resolved.item.title;
 }
 
 export default function ShareSheetScreen() {
@@ -30,7 +26,7 @@ export default function ShareSheetScreen() {
   const [sent, setSent] = useState(false);
 
   const onClose = () => router.back();
-  const title = titleForShareId(id);
+  const title = titleOf(useResolveSaved()(id));
   const friends = (conversations ?? []).filter((c) => c.kind !== 'coach');
   const count = Object.values(picks).filter(Boolean).length;
   const toggle = (cid: string) => setPicks((p) => ({ ...p, [cid]: !p[cid] }));

@@ -266,3 +266,69 @@ insert into circle_ideas (
   )
 on conflict (id) do nothing;
 
+
+-- ── 0005: slugs + the display fields 0001 had no column for ────────────────
+-- Plain updates keyed on the uuid-v5 ids above, so this block re-runs safely.
+update activities a set slug = v.slug, surface = v.surface,
+  peer_safe = v.safe, peer_welcoming = v.welcoming, peer_useful = v.useful,
+  feedback = v.feedback::jsonb
+from (values
+  ('8fb6136c-518c-556d-aaf6-d21807d384fe'::uuid, 'r1', 'home', 96, 94, 90, '[]'),
+  ('d70b2be4-00fa-5899-8931-e8c1554316bb'::uuid, 'r2', 'home', 98, 90, 92, '[]'),
+  ('4b7e3c27-5447-51ad-a5c3-3801e871190f'::uuid, 'r3', 'home', 96, 88, 88, '[]'),
+  ('4e1ede18-e562-5983-bcf5-f46a2d073d49'::uuid, 'r4', 'home', 94, 100, 86, '[]'),
+  ('7bedeccd-fe9c-518c-b533-b8c1195f867d'::uuid, 'r5', 'home', 95, 88, 84, '[]'),
+  ('1b5925fe-8717-5f55-9290-ae2aec11f0b6'::uuid, 'd1', 'discover', null, null, null,
+    '[{"id":"f","label":{"en":"safe","zh":"安全"},"pct":96},{"id":"w","label":{"en":"welcoming","zh":"友善"},"pct":94},{"id":"b","label":{"en":"beginner-friendly","zh":"适合初学"},"pct":92}]'),
+  ('ef412cba-0a2c-58f4-8f1b-24ad24a1d141'::uuid, 'd2', 'discover', null, null, null,
+    '[{"id":"f","label":{"en":"safe","zh":"安全"},"pct":92},{"id":"w","label":{"en":"welcoming","zh":"友善"},"pct":95}]'),
+  ('6cb28eaa-266f-5177-b0af-f650f094c821'::uuid, 'd3', 'discover', null, null, null, '[]'),
+  ('7772d30a-a5fb-5612-8db6-a34bb8c54070'::uuid, 'd4', 'discover', null, null, null, '[]'),
+  ('0c34070a-2731-5495-8eac-a8f884118da4'::uuid, 'd5', 'discover', null, null, null, '[]'),
+  ('d91afe0b-ebd4-5c1e-ae57-bc9947d4e656'::uuid, 'd6', 'discover', null, null, null, '[]')
+) as v(id, slug, surface, safe, welcoming, useful, feedback)
+where a.id = v.id;
+
+update vr_sessions s set slug = v.slug from (values
+  ('93654dd0-a25a-5207-8edd-3dd90bff5471'::uuid, 'v1'),
+  ('0332f303-9aeb-5276-88f2-d989b2e0b637'::uuid, 'v2'),
+  ('476d149f-1862-5899-92d8-fc45d0ec8723'::uuid, 'v3')
+) as v(id, slug) where s.id = v.id;
+
+update plans p set slug = v.slug, host = v.host::jsonb, going_count = v.going,
+  attendee_names = v.names, friend_names = v.friends
+from (values
+  ('94b8e9b7-2f92-51e0-a91d-61bdd29b5a46'::uuid, 'u1', '{"en":"Sarah · Blue Coast","zh":"Sarah · 蓝海岸"}', 12,
+    '{Sarah,Elena,Priya}'::text[], '{Elena,Priya}'::text[]),
+  ('affbca3f-8140-59f0-8107-bf7291d2ffdb'::uuid, 'u2', '{"en":"Mei-Lin","zh":"美琳"}', 6,
+    '{Mei-Lin,Hana}'::text[], '{Hana}'::text[])
+) as v(id, slug, host, going, names, friends)
+where p.id = v.id;
+
+update circle_ideas c set slug = v.slug, who = v.who::jsonb,
+  interested_count = v.n, interested_names = v.names
+from (values
+  ('0eb7f58e-5d21-5e99-bad0-f8cfd447dbef'::uuid, 'ci1', '{"en":"Mei-Lin","zh":"美琳"}', 4, '{Hana,Sarah}'::text[]),
+  ('7b2b4bdd-1a9d-563b-8c12-ef1af38c76a9'::uuid, 'ci2', '{"en":"Lien","zh":"莲"}', 2, '{Lien}'::text[]),
+  ('aa90b26b-67c0-5e38-801e-5b75843c9ccb'::uuid, 'ci3', '{"en":"Priya","zh":"普里娅"}', 0, '{}'::text[])
+) as v(id, slug, who, n, names)
+where c.id = v.id;
+
+update conversations c set slug = v.slug from (values
+  ('230ed220-b23c-514e-9496-e2ead16e8beb'::uuid, 'c1'),
+  ('e5c6fe18-b094-5aef-a173-dadfaac57f65'::uuid, 'c2'),
+  ('fb6a06d6-0d1e-544f-b324-05d24ee754df'::uuid, 'c3'),
+  ('e8d1c5e6-c3fa-5336-bfa6-8844d87e8227'::uuid, 'c4')
+) as v(id, slug) where c.id = v.id;
+
+-- Backdate the demonstration comments so their relative times ("3 days ago")
+-- match the mock copy at seed time; the app formats them from created_at.
+update activity_comments ac set created_at = now() - make_interval(days => v.days)
+from (values
+  ('8fb6136c-518c-556d-aaf6-d21807d384fe'::uuid, 'Hana', 3), ('8fb6136c-518c-556d-aaf6-d21807d384fe'::uuid, 'Priya', 8),
+  ('8fb6136c-518c-556d-aaf6-d21807d384fe'::uuid, 'Wei', 14), ('d70b2be4-00fa-5899-8931-e8c1554316bb'::uuid, 'Lien', 2),
+  ('d70b2be4-00fa-5899-8931-e8c1554316bb'::uuid, 'Elena', 8), ('4b7e3c27-5447-51ad-a5c3-3801e871190f'::uuid, 'Hana', 4),
+  ('4b7e3c27-5447-51ad-a5c3-3801e871190f'::uuid, 'Sarah', 8), ('4b7e3c27-5447-51ad-a5c3-3801e871190f'::uuid, 'Priya', 14),
+  ('4e1ede18-e562-5983-bcf5-f46a2d073d49'::uuid, 'Wei', 3), ('4e1ede18-e562-5983-bcf5-f46a2d073d49'::uuid, 'Priya', 14)
+) as v(activity_id, name, days)
+where ac.activity_id = v.activity_id and ac.display_name = v.name;

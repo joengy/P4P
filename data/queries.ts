@@ -1,85 +1,78 @@
 import { useQuery } from '@tanstack/react-query';
-import { HOME_REC_LIBRARY, VR_SESSIONS, DISCOVER_ITEMS, CONFIRMED, CIRCLE_IDEAS, HISTORY, CONVERSATIONS } from './mock';
+import { HISTORY, CONVERSATIONS } from './mock';
 import { useDeviceStore } from '@/store/device';
+import { useAuth } from '@/lib/auth';
 import { fetchVrCompletions, completionToHistoryItem } from '@/lib/vrBridge';
+import {
+  fetchHomeRecs,
+  fetchDiscoverItems,
+  fetchVrSessions,
+  fetchPlans,
+  fetchCircleIdeas,
+  resolveSaved,
+} from './catalog';
 
-// React Query wrappers around the in-memory mock arrays. Phase 3 swaps the
-// queryFn bodies for Supabase calls (`supabase.from('activities').select()`
-// etc.) — call sites (useHomeRecs(), useVrSession(id), ...) stay the same.
+// React Query hooks — the single data-access surface for screens. The public
+// catalogue (activities, VR sessions, plans, circle ideas) comes from Supabase
+// via data/catalog.ts. Each single-item hook selects from its list query, so a
+// list and its detail sheet share one request and one cache entry.
+
+const byId = <T extends { id: string }>(id: string | null | undefined) => (list: T[]) =>
+  list.find((x) => x.id === id) ?? null;
 
 export function useHomeRecs() {
-  return useQuery({
-    queryKey: ['homeRecs'],
-    queryFn: async () => Object.values(HOME_REC_LIBRARY),
-  });
+  return useQuery({ queryKey: ['homeRecs'], queryFn: fetchHomeRecs });
 }
 
 export function useHomeRec(id: string | null | undefined) {
-  return useQuery({
-    queryKey: ['homeRec', id],
-    queryFn: async () => (id ? HOME_REC_LIBRARY[id] ?? null : null),
-    enabled: !!id,
-  });
+  return useQuery({ queryKey: ['homeRecs'], queryFn: fetchHomeRecs, select: byId(id), enabled: !!id });
 }
 
 export function useVrSessions() {
-  return useQuery({
-    queryKey: ['vrSessions'],
-    queryFn: async () => VR_SESSIONS,
-  });
+  return useQuery({ queryKey: ['vrSessions'], queryFn: fetchVrSessions });
 }
 
 export function useVrSession(id: string | null | undefined) {
-  return useQuery({
-    queryKey: ['vrSession', id],
-    queryFn: async () => VR_SESSIONS.find((v) => v.id === id) ?? null,
-    enabled: !!id,
-  });
+  return useQuery({ queryKey: ['vrSessions'], queryFn: fetchVrSessions, select: byId(id), enabled: !!id });
 }
 
 export function useDiscoverItems() {
-  return useQuery({
-    queryKey: ['discoverItems'],
-    queryFn: async () => DISCOVER_ITEMS,
-  });
+  return useQuery({ queryKey: ['discoverItems'], queryFn: fetchDiscoverItems });
 }
 
 export function useDiscoverItem(id: string | null | undefined) {
-  return useQuery({
-    queryKey: ['discoverItem', id],
-    queryFn: async () => DISCOVER_ITEMS.find((d) => d.id === id) ?? null,
-    enabled: !!id,
-  });
+  return useQuery({ queryKey: ['discoverItems'], queryFn: fetchDiscoverItems, select: byId(id), enabled: !!id });
 }
 
 export function useConfirmedPlans() {
-  return useQuery({
-    queryKey: ['confirmedPlans'],
-    queryFn: async () => CONFIRMED,
-  });
+  const userId = useAuth().user?.id;
+  return useQuery({ queryKey: ['confirmedPlans', userId], queryFn: () => fetchPlans(userId) });
 }
 
 export function useConfirmedPlan(id: string | null | undefined) {
+  const userId = useAuth().user?.id;
   return useQuery({
-    queryKey: ['confirmedPlan', id],
-    queryFn: async () => CONFIRMED.find((c) => c.id === id) ?? null,
+    queryKey: ['confirmedPlans', userId],
+    queryFn: () => fetchPlans(userId),
+    select: byId(id),
     enabled: !!id,
   });
 }
 
 export function useCircleIdeas() {
-  return useQuery({
-    queryKey: ['circleIdeas'],
-    queryFn: async () => CIRCLE_IDEAS,
-  });
+  return useQuery({ queryKey: ['circleIdeas'], queryFn: fetchCircleIdeas });
 }
 
 export function useCircleIdea(id: string | null | undefined) {
-  return useQuery({
-    queryKey: ['circleIdea', id],
-    queryFn: async () => CIRCLE_IDEAS.find((c) => c.id === id) ?? null,
-    enabled: !!id,
-  });
+  return useQuery({ queryKey: ['circleIdeas'], queryFn: fetchCircleIdeas, select: byId(id), enabled: !!id });
+}
+
+/** Resolves saved ids against the three catalogue lists (Home recs, VR, Discover). */
+export function useResolveSaved() {
+  const recs = useHomeRecs().data ?? [];
+  const vr = useVrSessions().data ?? [];
+  const discover = useDiscoverItems().data ?? [];
+  return (id: string) => resolveSaved(id, recs, vr, discover);
 }
 
 // The one hook already reading real data: hikes completed in the VR game come

@@ -7,7 +7,7 @@ import { colors } from '@/constants/theme';
 import { L, type Bilingual } from '@/lib/L';
 import { useLang } from '@/i18n/useLang';
 import { useSavedStore } from '@/store/saved';
-import { resolveSaved } from '@/data/mock';
+import { useResolveSaved } from '@/data/queries';
 import type { SavedResolved } from '@/data/mock';
 
 function SavedRow({ resolved, onOpen, onUnsave }: { resolved: SavedResolved; onOpen: () => void; onUnsave: () => void }) {
@@ -49,6 +49,7 @@ export function SavedBlock() {
   const saved = useSavedStore((s) => s.saved);
   const toggleSaved = useSavedStore((s) => s.toggleSaved);
 
+  const resolveSaved = useResolveSaved();
   const items = saved.map(resolveSaved).filter((r): r is SavedResolved => !!r);
 
   return (
