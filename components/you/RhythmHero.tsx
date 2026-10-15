@@ -17,11 +17,15 @@ type Bucket = { key: string; label: string; mins: number; sessions: HistoryItem[
 
 function buildBuckets(range: Range, history: HistoryItem[]): Bucket[] {
   if (range === 'week') {
-    const letters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    // The last seven days ending today, each labelled with its real weekday
+    // (the mock data always ended on a Sunday, so a fixed M–S row looked right).
+    const letters = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    const today = new Date().getDay();
     return Array.from({ length: 7 }, (_, i) => {
       const day = 6 - i;
       const sessions = history.filter((h) => h.daysAgo === day);
-      return { key: 'd' + day, label: letters[i], mins: sessions.reduce((s, h) => s + h.min, 0), sessions, isNow: day === 0 };
+      const label = letters[(today - day + 7) % 7];
+      return { key: 'd' + day, label, mins: sessions.reduce((s, h) => s + h.min, 0), sessions, isNow: day === 0 };
     });
   }
   const weeks = range === 'month' ? 4 : 6;
@@ -237,7 +241,7 @@ export function RhythmHero() {
                       paddingHorizontal: 4,
                     }}
                   >
-                    {t('profile.avg', { n: avg })}
+                    {t(range === 'week' ? 'profile.avg' : 'profile.avgWeek', { n: avg })}
                   </Text>
                 </View>
               )}

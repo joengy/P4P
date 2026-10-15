@@ -240,12 +240,13 @@
     "tapBarOpen": "Tap a bar to open",
     "nothingLogged": "Nothing logged in this stretch yet.",
     "restDay": "A rest day — and that’s good too.",
-    "avg": "avg {{n}}",
+    "avg": "avg {{n}} min on days you moved",
     "thisDay": "This day",
     "agoTemplate": "{{label}} ago",
     "stretchFelt": "This stretch felt",
     "minsPerDay": "Minutes per day",
-    "minsPerWeek": "Minutes per week"
+    "minsPerWeek": "Minutes per week",
+    "avgWeek": "avg {{n}} min in weeks you moved"
   },
   "saved": {
     "savedTitle": "Saved for later",

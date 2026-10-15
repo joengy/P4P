@@ -240,12 +240,13 @@
     "tapBarOpen": "点按某天查看",
     "nothingLogged": "这段时间还没有记录。",
     "restDay": "休息的一天——也很好。",
-    "avg": "平均 {{n}}",
+    "avg": "有运动的日子平均 {{n}} 分钟",
     "thisDay": "这一天",
     "agoTemplate": "{{label}}前",
     "stretchFelt": "这段时间感觉",
     "minsPerDay": "每日活动分钟",
-    "minsPerWeek": "每周活动分钟"
+    "minsPerWeek": "每周活动分钟",
+    "avgWeek": "有运动的周平均 {{n}} 分钟"
   },
   "saved": {
     "savedTitle": "稍后再看",
