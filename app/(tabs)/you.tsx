@@ -9,11 +9,13 @@ import { RhythmHero } from '@/components/you/RhythmHero';
 import { SavedBlock } from '@/components/you/SavedBlock';
 import { TipsBlock } from '@/components/you/TipsBlock';
 import { KnowledgeBlock } from '@/components/you/KnowledgeBlock';
+import { useAuth } from '@/lib/auth';
 
 export default function YouScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { signOut } = useAuth();
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16, paddingTop: 4, paddingBottom: insets.bottom + 24, gap: 16 }}>
@@ -45,6 +47,10 @@ export default function YouScreen() {
           {t('profile.message')}
         </Btn>
       </Card>
+
+      <Btn size="sm" ghost onPress={signOut}>
+        {t('auth.signOut')}
+      </Btn>
     </ScrollView>
   );
 }
