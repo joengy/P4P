@@ -24,7 +24,13 @@ export default function DiscoverScreen() {
   }, [items, filter]);
 
   return (
-    <View style={{ flex: 1 }}>
+    // One scroll view: the title scrolls away like on the other tabs, and the
+    // filter row (child 1) stays pinned so filters remain reachable mid-list.
+    <ScrollView
+      style={{ flex: 1 }}
+      stickyHeaderIndices={[1]}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+    >
       <View style={{ paddingHorizontal: 16, paddingTop: 4, gap: 4 }}>
         <Text style={{ fontFamily: fonts.display, fontSize: 30, fontWeight: '600', color: colors.ink, letterSpacing: -0.4 }}>
           {t('discover.discoverTitle')}
@@ -32,40 +38,42 @@ export default function DiscoverScreen() {
         <Text style={{ fontSize: 14, color: colors.muted, lineHeight: 20, marginBottom: 8 }}>{t('discover.discoverSub')}</Text>
       </View>
 
-      <ScrollView
-        horizontal
-        style={{ flexGrow: 0, flexShrink: 0, height: 60 }}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 10, gap: 8, alignItems: 'center' }}
-      >
-        {DISCOVER_FILTERS.map((f) => {
-          const on = filter === f.id;
-          return (
-            <Pressable
-              key={f.id}
-              onPress={() => setFilter(f.id)}
-              style={{
-                paddingHorizontal: 14,
-                paddingVertical: 9,
-                borderRadius: radii.pill,
-                backgroundColor: on ? colors.accent : colors.surface,
-                borderWidth: on ? 0 : 1,
-                borderColor: colors.line,
-              }}
-            >
-              <Text style={{ fontSize: 13, lineHeight: 18, fontWeight: '700', color: on ? colors.onAccent : colors.ink }}>
-                {L(f.label, lang)}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+      <View style={{ backgroundColor: colors.bg }}>
+        <ScrollView
+          horizontal
+          style={{ flexGrow: 0, flexShrink: 0, height: 60 }}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 10, gap: 8, alignItems: 'center' }}
+        >
+          {DISCOVER_FILTERS.map((f) => {
+            const on = filter === f.id;
+            return (
+              <Pressable
+                key={f.id}
+                onPress={() => setFilter(f.id)}
+                style={{
+                  paddingHorizontal: 14,
+                  paddingVertical: 9,
+                  borderRadius: radii.pill,
+                  backgroundColor: on ? colors.accent : colors.surface,
+                  borderWidth: on ? 0 : 1,
+                  borderColor: colors.line,
+                }}
+              >
+                <Text style={{ fontSize: 13, lineHeight: 18, fontWeight: '700', color: on ? colors.onAccent : colors.ink }}>
+                  {L(f.label, lang)}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </View>
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingTop: 4, paddingBottom: insets.bottom + 24, gap: 14 }}>
+      <View style={{ padding: 16, paddingTop: 4, gap: 14 }}>
         {filtered.map((item) => (
           <DiscoverCard key={item.id} item={item} />
         ))}
-      </ScrollView>
-    </View>
+      </View>
+    </ScrollView>
   );
 }
