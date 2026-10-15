@@ -7,7 +7,7 @@ import { Photo, Tag, Btn, Icon, SaveButton, Bar, Avatar } from '@/components/ui'
 import { colors, fonts } from '@/constants/theme';
 import { L } from '@/lib/L';
 import { useLang } from '@/i18n/useLang';
-import { useSavedStore } from '@/store/saved';
+import { useSaved } from '@/data/queries';
 import { useDeviceStore } from '@/store/device';
 import { queueVrSession } from '@/lib/vrBridge';
 import { useVrSession } from '@/data/queries';
@@ -26,10 +26,10 @@ export default function VrDetailScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { lang } = useLang();
-  const saved = useSavedStore((s) => s.isSaved(id));
-  const toggleSaved = useSavedStore((s) => s.toggleSaved);
+  const { isSaved, toggleSaved } = useSaved();
+  const saved = isSaved(id);
   const deviceCode = useDeviceStore((s) => s.code);
-  const { data: v } = useVrSession(id);
+  const { data: v, isLoading: loading } = useVrSession(id);
   const [queue, setQueue] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
   const onClose = () => router.back();
@@ -65,7 +65,7 @@ export default function VrDetailScreen() {
     return (
       <Sheet onClose={onClose}>
         <View style={{ padding: 24 }}>
-          <Text>Not found</Text>
+          {!loading && <Text>Not found</Text>}
         </View>
       </Sheet>
     );

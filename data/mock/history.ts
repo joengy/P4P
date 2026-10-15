@@ -41,64 +41,6 @@ export const TYPE_META: Record<HistoryType, { label: Bilingual; tone: Tone; icon
   social: { label: { en: 'Social', zh: '社交' }, tone: 'accent', icon: 'people' },
 };
 
-// Ported from data-social.jsx's HISTORY, pre-merged with HISTORY_DETAILS.
-export const HISTORY: HistoryItem[] = [
-  {
-    id: 'h1', daysAgo: 0, when: { en: 'Today', zh: '今天' }, title: { en: 'Kauri forest walk', zh: '贝壳杉森林漫步' },
-    type: 'vr', min: 10, kcal: 45, intensity: 'gentle', mood: { en: 'calmer', zh: '更平静' },
-    location: { en: 'Home · VR (1.5 m clear space)', zh: '居家 · VR（1.5 米空地）' }, ledBy: { en: 'Mei-Lin (voice guide)', zh: '美琳（语音引导）' }, ledByIdx: 3, withWho: [],
-    notes: { en: 'You paused near the kauri grove, then kept walking. Breath stayed steady throughout.', zh: '你在贝壳杉林前停了一下，然后继续走。呼吸全程平稳。' },
-  },
-  {
-    id: 'h2', daysAgo: 1, when: { en: 'Yesterday', zh: '昨天' }, title: { en: 'Cornwall Park slow walk', zh: '康沃尔公园慢步走' },
-    type: 'outdoor', min: 40, kcal: 150, intensity: 'steady', mood: { en: 'restored', zh: '恢复了' },
-    location: { en: 'Cornwall Park · rose garden', zh: '康沃尔公园 · 玫瑰园' }, ledBy: { en: 'Mei-Lin', zh: '美琳' }, ledByIdx: 3, withWho: ['Sarah', 'Elena', 'Priya'],
-    notes: { en: 'A flat loop. You walked the full 40 minutes and rested twice on the benches.', zh: '平坦的环线。你走完了整整 40 分钟，在长椅上休息了两次。' },
-  },
-  {
-    id: 'h3', daysAgo: 3, when: { en: '3 days ago', zh: '3 天前' }, title: { en: 'Shoulder & neck reset', zh: '肩颈舒缓' },
-    type: 'home', min: 8, kcal: 30, intensity: 'gentle', mood: { en: 'looser', zh: '放松了' },
-    location: { en: 'Living room · seated', zh: '客厅 · 坐姿' }, ledBy: { en: 'Aroha (voice guide)', zh: 'Aroha（语音引导）' }, ledByIdx: 1, withWho: [],
-    notes: { en: 'Quick reset after a long screen day. Shoulders dropped noticeably by the end.', zh: '盯了一天屏幕后的快速舒缓。结束时肩膀明显放松。' },
-  },
-  {
-    id: 'h4', daysAgo: 5, when: { en: '5 days ago', zh: '5 天前' }, title: { en: 'Harbour evening walk', zh: '海港傍晚散步' },
-    type: 'outdoor', min: 35, kcal: 130, intensity: 'steady', mood: { en: 'peaceful', zh: '平静' },
-    location: { en: 'Mission Bay waterfront', zh: '使命湾海滨' }, ledBy: { en: 'Self-guided', zh: '自助' }, ledByIdx: null, withWho: ['Elena'],
-    notes: { en: 'Slower than your morning walks. You stopped to watch the sunset for a while.', zh: '比早晨的散步更慢。你停下来看了一会儿日落。' },
-  },
-  {
-    id: 'h5', daysAgo: 6, when: { en: '6 days ago', zh: '6 天前' }, title: { en: 'Lakeside rhythm (VR)', zh: '湖畔律动（VR）' },
-    type: 'vr', min: 12, kcal: 70, intensity: 'strong', mood: { en: 'energised', zh: '充满活力' },
-    location: { en: 'Home · VR (2 m space)', zh: '居家 · VR（2 米空地）' }, ledBy: { en: 'Sun (voice guide)', zh: 'Sun（语音引导）' }, ledByIdx: 4, withWho: [],
-    notes: { en: "First time at 'steady' intensity in VR. You took a 1-minute pause halfway and finished.", zh: '第一次在 VR 中尝试「平稳」强度。中途暂停了 1 分钟，最后完成了练习。' },
-  },
-  {
-    id: 'h6', daysAgo: 9, when: { en: '9 days ago', zh: '9 天前' }, title: { en: 'Beginner badminton', zh: '初学者羽毛球' },
-    type: 'social', min: 45, kcal: 220, intensity: 'strong', mood: { en: 'tired but happy', zh: '累但开心' },
-    location: { en: 'Sandringham Community House', zh: '桑德灵厄姆社区中心' }, ledBy: { en: 'Community House host', zh: '社区中心主持' }, ledByIdx: null, withWho: ['Hana', 'Lien'],
-    notes: { en: 'First real game. Many laughs. Knees felt it the next day — but in a good way.', zh: '第一次真正比赛。笑得很多。第二天膝盖有感觉——但是好的那种。' },
-  },
-  {
-    id: 'h7', daysAgo: 12, when: { en: '12 days ago', zh: '12 天前' }, title: { en: 'Beach clean-up walk', zh: '海滩清洁散步' },
-    type: 'outdoor', min: 50, kcal: 180, intensity: 'steady', mood: { en: 'connected', zh: '有连接感' },
-    location: { en: 'Mission Bay shore', zh: '使命湾海岸' }, ledBy: { en: 'Blue Coast group', zh: '蓝海岸小组' }, ledByIdx: 2, withWho: ['Sarah', 'Priya', 'Hana'],
-    notes: { en: 'Walked + tidied. Surprising how good carrying a small bag felt.', zh: '边走边清理。意外地，提一个小袋子感觉很好。' },
-  },
-  {
-    id: 'h8', daysAgo: 18, when: { en: '18 days ago', zh: '18 天前' }, title: { en: 'Wake the upper body (VR)', zh: '唤醒上半身（VR）' },
-    type: 'vr', min: 8, kcal: 35, intensity: 'gentle', mood: { en: 'awake', zh: '清醒' },
-    location: { en: 'Home · seated', zh: '居家 · 坐姿' }, ledBy: { en: 'Aroha (voice guide)', zh: 'Aroha（语音引导）' }, ledByIdx: 1, withWho: [],
-    notes: { en: 'Two short sessions back-to-back. Stiffness in the neck eased a lot.', zh: '连续做了两节短练习。颈部僵硬大大缓解。' },
-  },
-  {
-    id: 'h9', daysAgo: 26, when: { en: '26 days ago', zh: '26 天前' }, title: { en: 'Sunrise park yoga', zh: '日出公园瑜伽' },
-    type: 'outdoor', min: 30, kcal: 90, intensity: 'gentle', mood: { en: 'grounded', zh: '安定' },
-    location: { en: 'Cornwall Park · rose garden', zh: '康沃尔公园 · 玫瑰园' }, ledBy: { en: 'Mei-Lin', zh: '美琳' }, ledByIdx: 3, withWho: ['Mei-Lin', 'Hana'],
-    notes: { en: 'Cool morning air. Calmed your breath for the rest of the day.', zh: '清凉的清晨空气。整天的呼吸都比较平静。' },
-  },
-];
-
 // Ported from data-social.jsx's YOU_TIPS + pickYouTip().
 export const YOU_TIPS: YouTip[] = [
   {

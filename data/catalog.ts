@@ -141,6 +141,7 @@ function toVrSession(r: Row): VrSession {
 function toPlan(r: Row, status: PlanStatus | undefined): ConfirmedPlan {
   return {
     id: r.slug,
+    dbId: r.id,
     title: r.title,
     day: r.day,
     date: r.date,

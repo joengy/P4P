@@ -7,7 +7,7 @@ import { Photo, Tag, Btn, Stars, Avatar, SectionHead } from '@/components/ui';
 import { colors, fonts } from '@/constants/theme';
 import { L } from '@/lib/L';
 import { useLang } from '@/i18n/useLang';
-import { useSavedStore } from '@/store/saved';
+import { useSaved } from '@/data/queries';
 import { useHomeRec, useDiscoverItem } from '@/data/queries';
 
 function KV({ label, value }: { label: string; value: string }) {
@@ -24,11 +24,12 @@ export default function ActivityDetailScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { lang } = useLang();
-  const saved = useSavedStore((s) => s.isSaved(id));
-  const toggleSaved = useSavedStore((s) => s.toggleSaved);
+  const { isSaved, toggleSaved } = useSaved();
+  const saved = isSaved(id);
 
-  const { data: rec } = useHomeRec(id);
-  const { data: discoverItem } = useDiscoverItem(rec ? null : id);
+  const { data: rec, isLoading: recLoading } = useHomeRec(id);
+  const { data: discoverItem, isLoading: discoverLoading } = useDiscoverItem(rec ? null : id);
+  const loading = recLoading || discoverLoading;
 
   const onClose = () => router.back();
 
@@ -189,7 +190,7 @@ export default function ActivityDetailScreen() {
   return (
     <Sheet onClose={onClose}>
       <View style={{ padding: 24 }}>
-        <Text>Not found</Text>
+        {!loading && <Text>Not found</Text>}
       </View>
     </Sheet>
   );

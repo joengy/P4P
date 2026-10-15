@@ -38,7 +38,7 @@ export default function SessionDetailScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { lang } = useLang();
-  const { data: h } = useHistoryItem(id);
+  const { data: h, isLoading: loading } = useHistoryItem(id);
 
   const onClose = () => router.back();
 
@@ -46,7 +46,7 @@ export default function SessionDetailScreen() {
     return (
       <Sheet onClose={onClose}>
         <View style={{ padding: 24 }}>
-          <Text>Not found</Text>
+          {!loading && <Text>Not found</Text>}
         </View>
       </Sheet>
     );

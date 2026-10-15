@@ -14,7 +14,7 @@ export default function AskSheetScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { lang } = useLang();
-  const { data: idea } = useCircleIdea(id);
+  const { data: idea, isLoading: loading } = useCircleIdea(id);
   const [draft, setDraft] = useState('');
   const [sent, setSent] = useState(false);
 
@@ -29,7 +29,7 @@ export default function AskSheetScreen() {
     return (
       <Sheet onClose={onClose} snapPoints={['50%']}>
         <View style={{ padding: 24 }}>
-          <Text>Not found</Text>
+          {!loading && <Text>Not found</Text>}
         </View>
       </Sheet>
     );

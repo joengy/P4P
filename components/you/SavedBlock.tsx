@@ -6,8 +6,7 @@ import { Card, Photo, Tag, SaveButton, SectionHead, Icon } from '@/components/ui
 import { colors } from '@/constants/theme';
 import { L, type Bilingual } from '@/lib/L';
 import { useLang } from '@/i18n/useLang';
-import { useSavedStore } from '@/store/saved';
-import { useResolveSaved } from '@/data/queries';
+import { useResolveSaved, useSaved } from '@/data/queries';
 import type { SavedResolved } from '@/data/mock';
 
 function SavedRow({ resolved, onOpen, onUnsave }: { resolved: SavedResolved; onOpen: () => void; onUnsave: () => void }) {
@@ -46,8 +45,7 @@ function SavedRow({ resolved, onOpen, onUnsave }: { resolved: SavedResolved; onO
 export function SavedBlock() {
   const { t } = useTranslation();
   const router = useRouter();
-  const saved = useSavedStore((s) => s.saved);
-  const toggleSaved = useSavedStore((s) => s.toggleSaved);
+  const { saved, toggleSaved } = useSaved();
 
   const resolveSaved = useResolveSaved();
   const items = saved.map(resolveSaved).filter((r): r is SavedResolved => !!r);

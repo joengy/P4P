@@ -332,3 +332,14 @@ from (values
   ('4e1ede18-e562-5983-bcf5-f46a2d073d49'::uuid, 'Wei', 3), ('4e1ede18-e562-5983-bcf5-f46a2d073d49'::uuid, 'Priya', 14)
 ) as v(activity_id, name, days)
 where ac.activity_id = v.activity_id and ac.display_name = v.name;
+
+-- ── 0008: Messages-list display fields for the demo conversations ─────────
+update conversations c set avatar_idx = v.idx, member_count = v.n,
+  pinned_by_name = v.pin_by, pinned_by_idx = v.pin_idx, pinned_role = v.pin_role::jsonb
+from (values
+  ('c1', 3, null::int, null, null::int, null),
+  ('c2', 1, 14, 'Sarah', 2, '{"en":"Facilitator","zh":"带领者"}'),
+  ('c3', 2, null, null, null, null),
+  ('c4', 4, 5, null, null, null)
+) as v(slug, idx, n, pin_by, pin_idx, pin_role)
+where c.slug = v.slug;

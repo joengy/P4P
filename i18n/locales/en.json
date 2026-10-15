@@ -199,8 +199,7 @@
     "kindOutdoor": "Outdoor"
   },
   "profile": {
-    "youTitle": "Mei Chen",
-    "youSub": "Moving at your own pace since March",
+    "youSub": "Moving at your own pace since {{month}}",
     "thisMonth": "This month you moved",
     "times": "times",
     "inVr": "in VR",

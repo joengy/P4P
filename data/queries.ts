@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { HISTORY, CONVERSATIONS } from './mock';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { ChatMessage, PlanStatus } from './mock';
+import type { CheckInValue } from '@/components/home/CheckInCard';
 import { useDeviceStore } from '@/store/device';
 import { useAuth } from '@/lib/auth';
 import { fetchVrCompletions, completionToHistoryItem } from '@/lib/vrBridge';
@@ -11,6 +12,18 @@ import {
   fetchCircleIdeas,
   resolveSaved,
 } from './catalog';
+import {
+  fetchSaved,
+  setSaved,
+  setRsvp,
+  fetchTodayCheckIn,
+  insertCheckIn,
+  fetchConversations,
+  fetchMessages,
+  sendMessage,
+  fetchMovementHistory,
+  fetchProfile,
+} from './user';
 
 // React Query hooks — the single data-access surface for screens. The public
 // catalogue (activities, VR sessions, plans, circle ideas) comes from Supabase
@@ -75,51 +88,112 @@ export function useResolveSaved() {
   return (id: string) => resolveSaved(id, recs, vr, discover);
 }
 
-// The one hook already reading real data: hikes completed in the VR game come
-// back from Supabase and sit in front of the mock history.
-//
-// ponytail: real rows are prepended to the mock array rather than replacing it,
-// so the You tab's chart still has a body of history to draw during the study.
-// Drop the `...HISTORY` tail once there is enough real data to stand alone.
+// Movement history: the user's movement_sessions rows, plus hikes the paired
+// headset finished (vr_device_sessions), newest first.
 export function useHistory() {
+  const userId = useAuth().user?.id;
   // Subscribed rather than read via getState(): zustand's persist middleware
   // rehydrates from AsyncStorage asynchronously, so the code is still null on
   // the first render. Keying the query on it refetches once it arrives.
   const deviceCode = useDeviceStore((s) => s.code);
   return useQuery({
-    queryKey: ['history', deviceCode],
+    queryKey: ['history', userId, deviceCode],
+    enabled: !!userId,
     queryFn: async () => {
-      if (!deviceCode) return HISTORY;
-      try {
-        const rows = await fetchVrCompletions(deviceCode);
-        return [...rows.map(completionToHistoryItem), ...HISTORY];
-      } catch {
-        // An unreachable backend shouldn't empty the You tab.
-        return HISTORY;
-      }
+      const [moves, vr] = await Promise.all([
+        fetchMovementHistory(userId!),
+        deviceCode ? fetchVrCompletions(deviceCode).catch(() => []) : Promise.resolve([]),
+      ]);
+      return [...vr.map(completionToHistoryItem), ...moves].sort((a, b) => a.daysAgo - b.daysAgo);
     },
   });
 }
 
 export function useHistoryItem(id: string | null | undefined) {
-  return useQuery({
-    queryKey: ['historyItem', id],
-    queryFn: async () => HISTORY.find((h) => h.id === id) ?? null,
-    enabled: !!id,
-  });
+  const history = useHistory();
+  return { ...history, data: history.data?.find((h) => h.id === id) ?? null };
 }
 
 export function useConversations() {
-  return useQuery({
-    queryKey: ['conversations'],
-    queryFn: async () => CONVERSATIONS,
-  });
+  const userId = useAuth().user?.id;
+  return useQuery({ queryKey: ['conversations', userId], queryFn: fetchConversations, enabled: !!userId });
 }
 
 export function useConversation(id: string | null | undefined) {
+  const userId = useAuth().user?.id;
   return useQuery({
-    queryKey: ['conversation', id],
-    queryFn: async () => CONVERSATIONS.find((c) => c.id === id) ?? null,
-    enabled: !!id,
+    queryKey: ['conversations', userId],
+    queryFn: fetchConversations,
+    select: byId(id),
+    enabled: !!userId && !!id,
   });
+}
+
+export function useMessages(convDbId: string | undefined) {
+  const userId = useAuth().user?.id;
+  return useQuery({
+    queryKey: ['messages', convDbId],
+    queryFn: () => fetchMessages(convDbId!, userId!),
+    enabled: !!userId && !!convDbId,
+  });
+}
+
+export function useSendMessage(convDbId: string | undefined) {
+  const userId = useAuth().user?.id;
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (msg: Partial<ChatMessage>) => sendMessage(convDbId!, userId!, msg),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['messages', convDbId] });
+      qc.invalidateQueries({ queryKey: ['conversations'] });
+    },
+  });
+}
+
+/** Saved catalogue items by slug, with an optimistic toggle. */
+export function useSaved() {
+  const userId = useAuth().user?.id;
+  const qc = useQueryClient();
+  const key = ['saved', userId];
+  const { data: saved = [] } = useQuery({ queryKey: key, queryFn: () => fetchSaved(userId!), enabled: !!userId });
+  const mutation = useMutation({
+    mutationFn: ({ slug, on }: { slug: string; on: boolean }) => setSaved(userId!, slug, on),
+    onMutate: async ({ slug, on }) => {
+      await qc.cancelQueries({ queryKey: key });
+      const prev = qc.getQueryData<string[]>(key) ?? [];
+      qc.setQueryData<string[]>(key, on ? [...prev, slug] : prev.filter((s) => s !== slug));
+      return { prev };
+    },
+    onError: (_e, _v, ctx) => ctx && qc.setQueryData(key, ctx.prev),
+    onSettled: () => qc.invalidateQueries({ queryKey: key }),
+  });
+  return {
+    saved,
+    isSaved: (slug: string) => saved.includes(slug),
+    toggleSaved: (slug: string) => mutation.mutate({ slug, on: !saved.includes(slug) }),
+  };
+}
+
+export function useSetRsvp() {
+  const userId = useAuth().user?.id;
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ planDbId, status }: { planDbId: string; status: PlanStatus }) => setRsvp(userId!, planDbId, status),
+    onSettled: () => qc.invalidateQueries({ queryKey: ['confirmedPlans'] }),
+  });
+}
+
+export function useTodayCheckIn() {
+  const userId = useAuth().user?.id;
+  return useQuery({ queryKey: ['checkIn', userId], queryFn: () => fetchTodayCheckIn(userId!), enabled: !!userId });
+}
+
+export function useSaveCheckIn() {
+  const userId = useAuth().user?.id;
+  return useMutation({ mutationFn: (v: CheckInValue) => insertCheckIn(userId!, v) });
+}
+
+export function useProfile() {
+  const userId = useAuth().user?.id;
+  return useQuery({ queryKey: ['profile', userId], queryFn: () => fetchProfile(userId!), enabled: !!userId });
 }

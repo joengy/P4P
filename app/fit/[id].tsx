@@ -62,7 +62,7 @@ export default function PreferenceCheckScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { lang } = useLang();
-  const { data: idea } = useCircleIdea(id);
+  const { data: idea, isLoading: loading } = useCircleIdea(id);
   const [lg, setLg] = useState('either');
   const [pace, setPace] = useState('gentle');
   const [size, setSize] = useState('small');
@@ -74,7 +74,7 @@ export default function PreferenceCheckScreen() {
     return (
       <Sheet onClose={onClose} snapPoints={['60%']}>
         <View style={{ padding: 24 }}>
-          <Text>Not found</Text>
+          {!loading && <Text>Not found</Text>}
         </View>
       </Sheet>
     );

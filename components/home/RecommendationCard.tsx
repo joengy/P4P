@@ -6,7 +6,7 @@ import { Card, Photo, Tag, Btn, SaveButton } from '@/components/ui';
 import { colors, fonts } from '@/constants/theme';
 import { L } from '@/lib/L';
 import { useLang } from '@/i18n/useLang';
-import { useSavedStore } from '@/store/saved';
+import { useSaved } from '@/data/queries';
 import type { HomeRec } from '@/data/mock';
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
@@ -24,8 +24,8 @@ export function RecommendationCard({ rec }: { rec: HomeRec }) {
   const { t } = useTranslation();
   const { lang } = useLang();
   const router = useRouter();
-  const saved = useSavedStore((s) => s.isSaved(rec.id));
-  const toggleSaved = useSavedStore((s) => s.toggleSaved);
+  const { isSaved, toggleSaved } = useSaved();
+  const saved = isSaved(rec.id);
 
   const cueMap: Record<string, string> = {
     beginner: t('cues.beginner'),

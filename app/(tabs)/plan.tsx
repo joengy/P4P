@@ -6,8 +6,8 @@ import { colors, fonts } from '@/constants/theme';
 import { SectionHead } from '@/components/ui';
 import { ConfirmedCard } from '@/components/plan/ConfirmedCard';
 import { CircleIdeaCard } from '@/components/plan/CircleIdeaCard';
-import { useConfirmedPlans, useCircleIdeas } from '@/data/queries';
-import type { PlanStatus } from '@/data/mock';
+import { useConfirmedPlans, useCircleIdeas, useSetRsvp } from '@/data/queries';
+import type { ConfirmedPlan, PlanStatus } from '@/data/mock';
 
 const nextStatus: Record<PlanStatus, PlanStatus> = { going: 'saved', saved: 'maybe', maybe: 'going' };
 
@@ -16,10 +16,15 @@ export default function PlanScreen() {
   const insets = useSafeAreaInsets();
   const { data: confirmed } = useConfirmedPlans();
   const { data: circleIdeas } = useCircleIdeas();
+  const setRsvp = useSetRsvp();
+  // Shown immediately while the RSVP saves; the refetched plan then agrees.
   const [statuses, setStatuses] = useState<Record<string, PlanStatus>>({});
 
-  const cycle = (id: string, base: PlanStatus) =>
-    setStatuses((s) => ({ ...s, [id]: nextStatus[s[id] ?? base] }));
+  const cycle = (plan: ConfirmedPlan) => {
+    const next = nextStatus[statuses[plan.id] ?? plan.status];
+    setStatuses((s) => ({ ...s, [plan.id]: next }));
+    if (plan.dbId) setRsvp.mutate({ planDbId: plan.dbId, status: next });
+  };
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16, paddingTop: 4, paddingBottom: insets.bottom + 24, gap: 18 }}>
@@ -41,7 +46,7 @@ export default function PlanScreen() {
               key={plan.id}
               plan={plan}
               status={statuses[plan.id] ?? plan.status}
-              onCycle={() => cycle(plan.id, plan.status)}
+              onCycle={() => cycle(plan)}
             />
           ))}
         </View>

@@ -73,7 +73,7 @@ export async function fetchVrCompletions(deviceCode: string): Promise<VrDeviceSe
 
 const DAY_MS = 86_400_000;
 
-/** Shapes a completed row like the mock HISTORY entries the You tab renders. */
+/** Shapes a completed row like the movement history entries the You tab renders. */
 export function completionToHistoryItem(row: VrDeviceSession): HistoryItem {
   const ended = row.ended_at ? new Date(row.ended_at) : new Date();
   const daysAgo = Math.max(0, Math.floor((Date.now() - ended.getTime()) / DAY_MS));

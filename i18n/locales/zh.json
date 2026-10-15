@@ -199,8 +199,7 @@
     "kindOutdoor": "户外"
   },
   "profile": {
-    "youTitle": "陈美",
-    "youSub": "从三月起，按自己的节奏前行",
+    "youSub": "从{{month}}起，按自己的节奏前行",
     "thisMonth": "本月你动了",
     "times": "次",
     "inVr": "在 VR 中",

@@ -7,8 +7,7 @@ import { Icon, Avatar } from '@/components/ui';
 import { colors } from '@/constants/theme';
 import { L } from '@/lib/L';
 import { useLang } from '@/i18n/useLang';
-import { useConversation } from '@/data/queries';
-import { CHATS } from '@/data/mock';
+import { useConversation, useMessages, useSendMessage } from '@/data/queries';
 import type { ChatMessage } from '@/data/mock';
 import { MsgBubble } from '@/components/messages/MsgBubble';
 import { StickerTray } from '@/components/messages/StickerTray';
@@ -20,8 +19,12 @@ export default function ChatScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { lang } = useLang();
-  const { data: conv } = useConversation(id);
-  const [msgs, setMsgs] = useState<ChatMessage[]>(() => CHATS[id] ?? []);
+  const { data: conv, isLoading: loading } = useConversation(id);
+  const { data: saved } = useMessages(conv?.dbId);
+  const sendMessage = useSendMessage(conv?.dbId);
+  // Messages being sent, shown straight away and dropped once the refetch has them.
+  const [pending, setPending] = useState<ChatMessage[]>([]);
+  const msgs = [...(saved ?? []), ...pending];
   const [tray, setTray] = useState(false);
   const [draft, setDraft] = useState('');
   const scrollRef = useRef<ScrollView>(null);
@@ -38,7 +41,8 @@ export default function ChatScreen() {
   };
 
   const send = (payload: Partial<ChatMessage>) => {
-    setMsgs((m) => [...m, { from: 'me', time: 'now', ...payload }]);
+    setPending((m) => [...m, { from: 'me', time: 'now', ...payload }]);
+    sendMessage.mutate(payload, { onSettled: () => setPending([]) });
     setDraft('');
     requestAnimationFrame(() => scrollRef.current?.scrollToEnd({ animated: true }));
   };
@@ -46,7 +50,7 @@ export default function ChatScreen() {
   if (!conv) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg, padding: 24, paddingTop: insets.top + 24 }}>
-        <Text>Not found</Text>
+        {!loading && <Text>Not found</Text>}
       </View>
     );
   }

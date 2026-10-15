@@ -121,6 +121,8 @@ export type GroupNormKey = 'slowPace' | 'newcomers' | 'noChat' | 'restAnytime' |
 
 export type ConfirmedPlan = {
   id: string;
+  /** Database uuid, for writes (RSVPs). Absent on mock data. */
+  dbId?: string;
   title: Bilingual;
   day: Bilingual;
   date: string;
@@ -203,6 +205,8 @@ export type ConversationKind = 'coach' | 'group' | 'friend' | 'family';
 
 export type Conversation = {
   id: string;
+  /** Database uuid, for writes (sending messages). Absent on mock data. */
+  dbId?: string;
   name: Bilingual;
   kind: ConversationKind;
   idx: number;

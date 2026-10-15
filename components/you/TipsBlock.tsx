@@ -5,12 +5,14 @@ import { Card, Icon, Btn } from '@/components/ui';
 import { colors, toneColors } from '@/constants/theme';
 import { L } from '@/lib/L';
 import { useLang } from '@/i18n/useLang';
-import { HISTORY, pickYouTip } from '@/data/mock';
+import { pickYouTip } from '@/data/mock';
+import { useHistory } from '@/data/queries';
 
 export function TipsBlock() {
   const { t } = useTranslation();
   const { lang } = useLang();
-  const items = HISTORY.filter((h) => h.daysAgo <= 30);
+  const { data: history = [] } = useHistory();
+  const items = history.filter((h) => h.daysAgo <= 30);
   const tip = pickYouTip(items);
   const tone = toneColors(tip.kindTone);
 

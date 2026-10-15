@@ -7,7 +7,7 @@ import { Photo, Icon, Avatar, AvatarStack, Tag } from '@/components/ui';
 import { colors, fonts, toneColors, radii, type Tone } from '@/constants/theme';
 import { L } from '@/lib/L';
 import { useLang } from '@/i18n/useLang';
-import { useConfirmedPlan } from '@/data/queries';
+import { useConfirmedPlan, useSetRsvp } from '@/data/queries';
 import type { PlanStatus, GroupNormKey } from '@/data/mock';
 
 const statusMeta: Record<PlanStatus, { tone: Tone; icon: 'check' | 'spark' | 'moon' }> = {
@@ -30,8 +30,9 @@ export default function PlanDetailScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { lang } = useLang();
-  const { data: plan } = useConfirmedPlan(id);
+  const { data: plan, isLoading: loading } = useConfirmedPlan(id);
   const [status, setStatus] = useState<PlanStatus | null>(null);
+  const setRsvp = useSetRsvp();
   const [left, setLeft] = useState(false);
 
   const onClose = () => router.back();
@@ -40,7 +41,7 @@ export default function PlanDetailScreen() {
     return (
       <Sheet onClose={onClose}>
         <View style={{ padding: 24 }}>
-          <Text>Not found</Text>
+          {!loading && <Text>Not found</Text>}
         </View>
       </Sheet>
     );
@@ -81,7 +82,11 @@ export default function PlanDetailScreen() {
             <Text style={{ fontSize: 13.5, fontWeight: '600', color: colors.ink }}>{L(plan.where, lang)}</Text>
           </View>
           <Pressable
-            onPress={() => setStatus(nextStatus[status ?? plan.status])}
+            onPress={() => {
+              const next = nextStatus[status ?? plan.status];
+              setStatus(next);
+              if (plan.dbId) setRsvp.mutate({ planDbId: plan.dbId, status: next });
+            }}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: st.bg, paddingHorizontal: 12, paddingVertical: 9, borderRadius: radii.sm, alignSelf: 'flex-start' }}
           >
             <Icon name={s.icon} size={14} stroke={st.fg} sw={2.2} />
