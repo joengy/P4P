@@ -47,7 +47,9 @@ export function AfterVrBridge({ session }: { session: VrSession }) {
         <Tag tone="lav">{t('move.bridgeStep')}</Tag>
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <View style={{ flex: 1 }}>
-            <Btn full>{t('move.bridgeCta')}</Btn>
+            <Btn full onPress={() => rw.id && router.push(`/activity/${rw.id}`)}>
+              {t('move.bridgeCta')}
+            </Btn>
           </View>
           <View style={{ flex: 1 }}>
             <Btn full ghost onPress={() => router.push(`/share/${session.id}?invite=1`)}>

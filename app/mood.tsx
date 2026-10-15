@@ -207,7 +207,13 @@ export default function MoodCheckInScreen() {
                 {L(suggestion.title, lang)}
               </Text>
               <Text style={{ fontSize: 14, color: colors.muted, lineHeight: 20, marginBottom: 15 }}>{L(suggestion.body, lang)}</Text>
-              <Btn full size="lg" tone={kindTone} icon={<Icon name={suggestion.kind === 'vr' ? 'headset' : 'play'} size={17} stroke="#fff" />}>
+              <Btn
+                full
+                size="lg"
+                tone={kindTone}
+                icon={<Icon name={suggestion.kind === 'vr' ? 'headset' : 'play'} size={17} stroke="#fff" />}
+                onPress={() => router.navigate(suggestion.kind === 'outdoor' ? '/(tabs)/discover' : '/(tabs)/move')}
+              >
                 {suggestion.kind === 'outdoor' ? t('move.continueOutdoors') : t('move.startSession')}
               </Btn>
             </View>

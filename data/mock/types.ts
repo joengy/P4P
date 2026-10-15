@@ -80,7 +80,7 @@ export type VrSession = {
   triedBy: number;
   feedback: VrFeedback[];
   guide: { name: string; bilingual: boolean; beginner: boolean; idx: number; bio: Bilingual };
-  realWorld?: { title: Bilingual; when: Bilingual };
+  realWorld?: { id?: string; title: Bilingual; when: Bilingual };
 };
 
 export type DiscoverFilterId = 'all' | 'near' | 'group' | 'home' | 'vr' | 'women';

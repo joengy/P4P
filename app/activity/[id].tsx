@@ -8,6 +8,7 @@ import { colors, fonts } from '@/constants/theme';
 import { L } from '@/lib/L';
 import { useLang } from '@/i18n/useLang';
 import { useSaved } from '@/data/queries';
+import { useCta } from '@/lib/useCta';
 import { useHomeRec, useDiscoverItem } from '@/data/queries';
 
 function KV({ label, value }: { label: string; value: string }) {
@@ -25,6 +26,7 @@ export default function ActivityDetailScreen() {
   const { t } = useTranslation();
   const { lang } = useLang();
   const { isSaved, toggleSaved } = useSaved();
+  const onCta = useCta();
   const saved = isSaved(id);
 
   const { data: rec, isLoading: recLoading } = useHomeRec(id);
@@ -93,7 +95,7 @@ export default function ActivityDetailScreen() {
             ))}
           </View>
 
-          <Btn full>{rec.kind === 'vr' ? t('move.startSession') : t('home.tryThis')}</Btn>
+          <Btn full onPress={() => onCta(rec.cta, rec)}>{rec.kind === 'vr' ? t('move.startSession') : t('home.tryThis')}</Btn>
 
           <Btn full ghost onPress={() => router.push(`/share/${rec.id}`)}>
             {t('social.shareWithFriend')}
@@ -170,7 +172,9 @@ export default function ActivityDetailScreen() {
             </Text>
           </View>
 
-          <Btn full>{t(`discover.cta${discoverItem.cta[0].toUpperCase()}${discoverItem.cta.slice(1)}` as any)}</Btn>
+          <Btn full onPress={() => onCta(discoverItem.cta, discoverItem)}>
+            {t(`discover.cta${discoverItem.cta[0].toUpperCase()}${discoverItem.cta.slice(1)}` as any)}
+          </Btn>
 
           <Btn full ghost onPress={() => router.push(`/share/${discoverItem.id}`)}>
             {t('social.shareWithFriend')}

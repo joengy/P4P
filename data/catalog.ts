@@ -134,7 +134,9 @@ function toVrSession(r: Row): VrSession {
       idx: r.guide_idx,
       bio: r.guide_bio,
     },
-    realWorld: r.real_world ? { title: r.real_world.headline, when: r.real_world_when } : undefined,
+    realWorld: r.real_world
+      ? { id: r.real_world.slug, title: r.real_world.headline, when: r.real_world_when }
+      : undefined,
   };
 }
 
@@ -207,7 +209,7 @@ export async function fetchDiscoverItems(): Promise<DiscoverItem[]> {
 
 export async function fetchVrSessions(): Promise<VrSession[]> {
   const data = await rows(
-    supabase.from('vr_sessions').select('*, real_world:activities(headline)').order('slug')
+    supabase.from('vr_sessions').select('*, real_world:activities(headline, slug)').order('slug')
   );
   return data.map(toVrSession);
 }

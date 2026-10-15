@@ -7,6 +7,7 @@ import { colors } from '@/constants/theme';
 import { L } from '@/lib/L';
 import { useLang } from '@/i18n/useLang';
 import type { DiscoverItem, CtaKey } from '@/data/mock';
+import { useCta } from '@/lib/useCta';
 
 const ctaLabelKey: Record<CtaKey, string> = {
   rsvp: 'discover.ctaRsvp',
@@ -22,6 +23,7 @@ export function DiscoverCard({ item }: { item: DiscoverItem }) {
   const { t } = useTranslation();
   const { lang } = useLang();
   const router = useRouter();
+  const onCta = useCta();
 
   return (
     <Card onPress={() => router.push(`/activity/${item.id}`)} pad={0} style={{ overflow: 'hidden' }}>
@@ -89,7 +91,9 @@ export function DiscoverCard({ item }: { item: DiscoverItem }) {
             <Stars value={item.rating} />
             {item.when && <Text style={{ fontSize: 12, color: colors.faint }}>· {L(item.when, lang)}</Text>}
           </View>
-          <Btn size="sm">{t(ctaLabelKey[item.cta])}</Btn>
+          <Btn size="sm" onPress={() => onCta(item.cta, item)}>
+            {t(ctaLabelKey[item.cta])}
+          </Btn>
         </View>
       </View>
     </Card>

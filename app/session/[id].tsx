@@ -120,7 +120,13 @@ export default function SessionDetailScreen() {
           </View>
         )}
 
-        <Btn full size="lg" tone={tm.tone} icon={<Icon name={tm.icon} size={17} stroke="#fff" />}>
+        <Btn
+          full
+          size="lg"
+          tone={tm.tone}
+          icon={<Icon name={tm.icon} size={17} stroke="#fff" />}
+          onPress={() => router.navigate(h.type === 'vr' || h.type === 'home' ? '/(tabs)/move' : '/(tabs)/discover')}
+        >
           {t('session.doAgain')}
         </Btn>
       </View>

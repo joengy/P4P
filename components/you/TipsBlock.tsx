@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
 import { Card, Icon, Btn } from '@/components/ui';
 import { colors, toneColors } from '@/constants/theme';
 import { L } from '@/lib/L';
@@ -14,6 +15,14 @@ export function TipsBlock() {
   const { data: history = [] } = useHistory();
   const items = history.filter((h) => h.daysAgo <= 30);
   const tip = pickYouTip(items);
+  const router = useRouter();
+  // Each tip points at the thing it suggests: the 8-min reset, the real
+  // Cornwall Park trail, or the gentle VR sessions on Move.
+  const onTip = () => {
+    if (tip.match === 'mostly-outdoor') router.push('/activity/d5');
+    else if (tip.match === 'mostly-vr') router.push('/activity/d1');
+    else router.navigate('/(tabs)/move');
+  };
   const tone = toneColors(tip.kindTone);
 
   return (
@@ -41,7 +50,7 @@ export function TipsBlock() {
           </View>
         </View>
         <Text style={{ fontSize: 13.5, color: colors.muted, lineHeight: 20, marginBottom: 13 }}>{L(tip.body, lang)}</Text>
-        <Btn size="sm" tone={tip.kindTone} icon={<Icon name="arrow" size={14} stroke="#fff" />}>
+        <Btn size="sm" tone={tip.kindTone} icon={<Icon name="arrow" size={14} stroke="#fff" />} onPress={onTip}>
           {L(tip.cta, lang)}
         </Btn>
       </Card>
