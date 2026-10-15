@@ -77,7 +77,7 @@ export function RecommendationCard({ rec }: { rec: HomeRec }) {
           {rec.org && (
             <Text style={{ fontSize: 12.5 }}>
               <Text style={{ color: colors.muted }}>{t('home.languageLabel')}: </Text>
-              <Text style={{ fontWeight: '700', color: colors.ink }}>{rec.detail.language}</Text>
+              <Text style={{ fontWeight: '700', color: colors.ink }}>{L(rec.detail.language, lang)}</Text>
             </Text>
           )}
         </View>
@@ -88,7 +88,7 @@ export function RecommendationCard({ rec }: { rec: HomeRec }) {
 
         <Section label={t('home.theBasics')}>
           <Text style={{ fontSize: 13, color: colors.muted }}>
-            {rec.detail.time} · {L(rec.dur, lang)} · {rec.detail.location} · {rec.detail.cost}
+            {L(rec.detail.time, lang)} · {L(rec.dur, lang)} · {L(rec.detail.location, lang)} · {L(rec.detail.cost, lang)}
           </Text>
         </Section>
 

@@ -311,7 +311,9 @@
     "withYou": "一同参与",
     "solo": "一个人",
     "doAgain": "再来一次",
-    "similarSession": "试试相似的"
+    "similarSession": "试试相似的",
+    "costLabel": "费用",
+    "bringLabel": "携带"
   },
   "common": {
     "viewAll": "查看全部",

@@ -25,12 +25,12 @@ export type PeerEvidence = {
 };
 
 export type ActivityDetail = {
-  time: string;
-  location: string;
-  cost: string;
-  language: string;
-  intensity: string;
-  bring: string;
+  time: Bilingual;
+  location: Bilingual;
+  cost: Bilingual;
+  language: Bilingual;
+  intensity: Bilingual;
+  bring: Bilingual;
 };
 
 export type HomeRecKind = 'group' | 'home' | 'vr' | 'library' | 'outdoor';

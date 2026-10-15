@@ -48,12 +48,12 @@ export default function ActivityDetailScreen() {
           </View>
 
           <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-            <KV label={t('session.whenLabel')} value={rec.detail.time} />
-            <KV label={t('session.whereLabel')} value={rec.detail.location} />
-            <KV label="Cost" value={rec.detail.cost} />
-            <KV label={t('home.languageLabel')} value={rec.detail.language} />
-            <KV label={t('session.intensityLabel')} value={rec.detail.intensity} />
-            <KV label="Bring" value={rec.detail.bring} />
+            <KV label={t('session.whenLabel')} value={L(rec.detail.time, lang)} />
+            <KV label={t('session.whereLabel')} value={L(rec.detail.location, lang)} />
+            <KV label={t('session.costLabel')} value={L(rec.detail.cost, lang)} />
+            <KV label={t('home.languageLabel')} value={L(rec.detail.language, lang)} />
+            <KV label={t('session.intensityLabel')} value={L(rec.detail.intensity, lang)} />
+            <KV label={t('session.bringLabel')} value={L(rec.detail.bring, lang)} />
           </View>
 
           {rec.org && (

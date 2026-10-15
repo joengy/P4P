@@ -311,7 +311,9 @@
     "withYou": "With you",
     "solo": "On your own",
     "doAgain": "Do it again",
-    "similarSession": "Try a similar one"
+    "similarSession": "Try a similar one",
+    "costLabel": "Cost",
+    "bringLabel": "Bring"
   },
   "common": {
     "viewAll": "View all",

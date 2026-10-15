@@ -343,3 +343,21 @@ from (values
   ('c4', 4, 5, null, null, null)
 ) as v(slug, idx, n, pin_by, pin_idx, pin_role)
 where c.slug = v.slug;
+
+-- ── 0009: bilingual activity details (Home recommendations r1–r5) ─────────
+update activities a set
+  detail_time = v.dt::jsonb, detail_location = v.loc::jsonb, detail_cost = v.cost::jsonb,
+  detail_language = v.lang::jsonb, detail_intensity = v.inten::jsonb, detail_bring = v.bring::jsonb
+from (values
+  ('r1', '{"en":"9:00 AM Sat","zh":"周六上午 9:00"}', '{"en":"Cornwall Park rose garden","zh":"康沃尔公园玫瑰园"}',
+    '{"en":"Free","zh":"免费"}', '{"en":"EN / 中","zh":"英文 / 中文"}', '{"en":"Gentle","zh":"温和"}', '{"en":"Comfortable shoes, water","zh":"舒适的鞋、水"}'),
+  ('r2', '{"en":"Anytime","zh":"任何时间"}', '{"en":"Home","zh":"居家"}',
+    '{"en":"Free","zh":"免费"}', '{"en":"EN / 中","zh":"英文 / 中文"}', '{"en":"Very gentle","zh":"非常温和"}', '{"en":"A chair, water","zh":"一把椅子、水"}'),
+  ('r3', '{"en":"Anytime","zh":"任何时间"}', '{"en":"Home · 1.5m space","zh":"居家 · 1.5 米空间"}',
+    '{"en":"Free","zh":"免费"}', '{"en":"EN / 中","zh":"英文 / 中文"}', '{"en":"Gentle","zh":"温和"}', '{"en":"Headset, water","zh":"头显、水"}'),
+  ('r4', '{"en":"Wed 11:00 AM","zh":"周三上午 11:00"}', '{"en":"Mt Roskill Library","zh":"罗斯希尔图书馆"}',
+    '{"en":"Free","zh":"免费"}', '{"en":"EN only","zh":"仅英文"}', '{"en":"Gentle","zh":"温和"}', '{"en":"Yourself","zh":"只需你自己"}'),
+  ('r5', '{"en":"Anytime","zh":"任何时间"}', '{"en":"Mission Bay waterfront","zh":"使命湾海滨"}',
+    '{"en":"Free","zh":"免费"}', '{"en":"—","zh":"—"}', '{"en":"Gentle","zh":"温和"}', '{"en":"Water, comfortable shoes","zh":"水、舒适的鞋"}')
+) as v(slug, dt, loc, cost, lang, inten, bring)
+where a.slug = v.slug;
