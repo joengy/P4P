@@ -4,7 +4,7 @@ A bilingual (EN / 中文) movement and wellbeing app built with Expo and React N
 
 Screens are file-based routes under [app/](app/), content is served through React Query
 hooks in [data/queries.ts](data/queries.ts), and the Postgres schema lives in Supabase.
-There is no sign-in step yet — the app runs entirely off the mock data layer.
+Users sign in with email and password; every screen reads and writes the Supabase backend.
 
 ---
 
@@ -33,13 +33,8 @@ npm install
 
 ## 2. Configure the backend
 
-> **There is no sign-in step right now.** The app opens straight on the tabs and every
-> screen reads from the mock layer in [data/queries.ts](data/queries.ts), so you can run
-> it with no backend at all — this section only matters once Phase 3 starts reading real
-> data. The auth gate and the sign-in/sign-up screens were removed; restore them from git
-> history when per-user data lands.
-
-The app will talk to Supabase for data. Copy the template and fill in your own project's
+The app reads and writes everything through Supabase, so it needs a project with the
+migrations and seed applied (section 3). Copy the template and fill in your own project's
 values:
 
 ```bash
@@ -64,7 +59,7 @@ Notes:
   not on hot reload.
 
 Without valid credentials [lib/supabase.ts](lib/supabase.ts) falls back to a placeholder
-URL. Nothing reads from Supabase yet, so the app runs normally either way.
+URL and every screen will fail to load.
 
 ## 3. Set up the database
 
@@ -77,7 +72,13 @@ then optionally load the catalog seed data:
 | `0002_profile_trigger.sql` | Creates a `profiles` row on user signup |
 | `0003_lock_down_handle_new_user.sql` | Hardens the signup trigger |
 | `0004_vr_device_sessions.sql` | Bridge table to the Unity VR hike — queued sessions + completions |
-| `seed.sql` | Public catalog content — activities, VR sessions, plans, circle ideas |
+| `0005_catalogue_slugs.sql` | `slug` ids (r1, d4, v1 …) the app routes by, plus display columns |
+| `0006_fix_conversation_rls_recursion.sql` | Membership check in a SECURITY DEFINER function (fixes RLS recursion) |
+| `0007_private_membership_check.sql` | Moves that function out of the API-exposed schema |
+| `0008_demo_senders_and_chat_display.sql` | `sender_name` for demo-community messages, Messages-list fields |
+| `0009_bilingual_activity_details.sql` | Activity details become `{en, zh}` jsonb |
+| `seed.sql` | Public catalog content — activities, VR sessions, plans, circle ideas, conversations |
+| `seed_demo.sql` | History, chats, RSVPs and memberships for the demo account |
 
 The quickest route is the SQL editor in the Supabase dashboard: paste each file's
 contents and run them in order. With the [Supabase CLI](https://supabase.com/docs/guides/local-development)
@@ -88,9 +89,11 @@ supabase link --project-ref <your-project-ref>
 supabase db push
 ```
 
-`seed.sql` deliberately inserts only content that is visible without a login. Personal
-and social rows (check-ins, saved items, messages, RSVPs) are foreign-keyed to
-`auth.users` under RLS, so they only exist once a real account signs up.
+`seed.sql` inserts only content that is visible without a login. Personal and social
+rows (check-ins, saved items, messages, RSVPs) are foreign-keyed to `auth.users` under
+RLS, so `seed_demo.sql` attaches them to the demo account, which must exist first (sign
+it up through the app or Auth). It clears that account's rows before inserting, so it can
+be re-run to reset the demo.
 
 ## 4. Run it
 
@@ -108,7 +111,7 @@ code with Expo Go on a physical device. You can also jump straight to a platform
 | `npm run android` | Starts and opens the Android emulator |
 | `npm run web` | Starts and opens the web build |
 
-The app opens straight on the Home tab — there is no sign-in step.
+The app opens on the sign-in screen, then the Home tab.
 
 ---
 
@@ -126,12 +129,16 @@ components/
 constants/theme.ts      colors, spacing, type scale
 data/
   queries.ts            React Query hooks — the single data-access surface
-  mock/                 in-memory fixtures backing those hooks
+  catalog.ts            public catalogue reads + row→type mappers
+  user.ts               per-user reads and writes (saved, RSVPs, check-ins, chats, history)
+  mock/                 shared types and fixed UI config (filters, moods, stickers, tips)
 i18n/                   i18next setup + en/zh locale JSON
 lib/
-  supabase.ts           Supabase client (not read by any screen yet)
+  supabase.ts           Supabase client
+  auth.tsx              AuthProvider / useAuth (session state)
+  vrBridge.ts           phone half of the VR headset bridge
   L.ts                  Bilingual<T> resolver — L(node, lang)
-store/saved.ts          Zustand store for saved items, persisted to AsyncStorage
+store/device.ts         paired headset code, persisted to AsyncStorage
 supabase/               SQL migrations and seed data
 ```
 
@@ -143,12 +150,11 @@ supabase/               SQL migrations and seed data
   strings are type-checked. Run the dev server once after adding a route to regenerate
   the types.
 - **Bilingual content** is stored as `{ en, zh }` objects and read through `L()` from
-  [lib/L.ts](lib/L.ts). The same shape is used by the mock fixtures and the `jsonb`
-  columns in Postgres, so swapping a hook from mock to Supabase doesn't change call
-  sites.
+  [lib/L.ts](lib/L.ts), matching the `jsonb` columns in Postgres.
 - **Data access goes through [data/queries.ts](data/queries.ts).** Screens call hooks
-  like `useHomeRecs()` and never touch the Supabase client directly — that's what makes
-  the mock-to-backend swap a one-file change.
+  like `useHomeRecs()` and never touch the Supabase client directly. Rows are mapped onto
+  the types in [data/mock/types.ts](data/mock/types.ts) by [data/catalog.ts](data/catalog.ts)
+  and [data/user.ts](data/user.ts).
 - **New Architecture** is enabled. Check compatibility before adding native modules.
 
 ---
