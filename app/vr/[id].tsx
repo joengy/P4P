@@ -9,7 +9,8 @@ import { L } from '@/lib/L';
 import { useLang } from '@/i18n/useLang';
 import { useSaved } from '@/data/queries';
 import { useDeviceStore } from '@/store/device';
-import { queueVrSession } from '@/lib/vrBridge';
+import { queueVrSession, fetchHandoffState } from '@/lib/vrBridge';
+import { useQuery } from '@tanstack/react-query';
 import { useVrSession } from '@/data/queries';
 
 function SafetyRow({ icon, label }: { icon: 'check' | 'x' | 'pin' | 'heart'; label: string }) {
@@ -31,11 +32,28 @@ export default function VrDetailScreen() {
   const deviceCode = useDeviceStore((s) => s.code);
   const { data: v, isLoading: loading } = useVrSession(id);
   const [queue, setQueue] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [queuedId, setQueuedId] = useState<string | null>(null);
+
+  // Testers could not tell whether the phone had reached the headset, so after
+  // queuing we watch the row until the game marks it started. Nothing is
+  // claimed until the headset itself writes started_at.
+  const { data: handoff } = useQuery({
+    queryKey: ['handoff', queuedId],
+    queryFn: () => fetchHandoffState(queuedId!),
+    enabled: !!queuedId,
+    refetchInterval: (q) => (q.state.data === 'finished' ? false : 3000),
+    // Keep checking while the phone is in the background, i.e. while the user
+    // has the headset on, so the status is current when they look again.
+    refetchIntervalInBackground: true,
+  });
 
   const onClose = () => router.back();
 
   let startLabel = t('move.startSession');
-  if (queue === 'sent') startLabel = t('move.sentToHeadset');
+  if (queue === 'sent') {
+    startLabel =
+      handoff === 'finished' ? t('move.headsetFinished') : handoff === 'started' ? t('move.headsetStarted') : t('move.waitingForHeadset');
+  }
   else if (!deviceCode) startLabel = t('move.pairFirst');
 
   // Hands the session to the paired headset. The player still confirms the
@@ -49,13 +67,14 @@ export default function VrDetailScreen() {
     }
     setQueue('sending');
     try {
-      await queueVrSession({
+      const queued = await queueVrSession({
         deviceCode,
         vrSessionRef: v.id,
         title: v.title,
         mode: v.feltIntensity,
         minutes: v.min,
       });
+      setQueuedId(queued);
       setQueue('sent');
     } catch {
       setQueue('error');
@@ -138,7 +157,7 @@ export default function VrDetailScreen() {
         <View style={{ gap: 8 }}>
           <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
             <View style={{ flex: 1 }}>
-              <Btn full onPress={onStart} disabled={queue === 'sending'}>
+              <Btn full onPress={onStart} disabled={queue === 'sending' || queue === 'sent'}>
                 {startLabel}
               </Btn>
             </View>
@@ -146,7 +165,7 @@ export default function VrDetailScreen() {
           </View>
           {queue === 'sent' && (
             <Text style={{ fontSize: 12.5, color: colors.muted, textAlign: 'center' }}>
-              {t('move.sentToHeadsetHint')}
+              {handoff === 'started' || handoff === 'finished' ? t('move.headsetStartedHint') : t('move.waitingForHeadsetHint')}
             </Text>
           )}
           {queue === 'error' && (

@@ -103,9 +103,12 @@
     "pairCurrent": "已连接的头显",
     "pairForget": "断开此头显",
     "pairFirst": "连接头显",
-    "sentToHeadset": "已在头显中准备好",
-    "sentToHeadsetHint": "戴上头显即可开始，节奏已按你的选择设定好。",
-    "sendFailed": "无法连接到头显。请检查网络后重试。"
+    "sendFailed": "无法连接到头显。请检查网络后重试。",
+    "waitingForHeadset": "正在等待头显…",
+    "waitingForHeadsetHint": "戴上头显并打开徒步。头显一接收到练习，这里就会更新。",
+    "headsetStarted": "已在头显中开始 ✓",
+    "headsetStartedHint": "头显已收到练习，并按你的节奏设置好。完成后会显示在“我的”页面。",
+    "headsetFinished": "已完成——在“我的”页面查看"
   },
   "discover": {
     "discoverTitle": "找到下一步",

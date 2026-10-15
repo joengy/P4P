@@ -39,7 +39,7 @@ export function intensityForMode(mode: VrMode): VrIntensity {
   return mode === 'gentle' ? 'low' : mode === 'strong' ? 'high' : 'medium';
 }
 
-/** Queues a hike for the paired headset. Resolves once the row is written. */
+/** Queues a hike for the paired headset. Resolves to the new row's id once written. */
 export async function queueVrSession(args: {
   deviceCode: string;
   vrSessionRef: string;
@@ -47,15 +47,30 @@ export async function queueVrSession(args: {
   mode: VrMode;
   minutes: number;
 }) {
-  const { error } = await supabase.from(TABLE).insert({
+  const { data, error } = await supabase
+    .from(TABLE)
+    .insert({
     device_code: args.deviceCode,
     vr_session_ref: args.vrSessionRef,
     title: typeof args.title === 'string' ? { en: args.title } : args.title,
     mode: args.mode,
     intensity: intensityForMode(args.mode),
     minutes: args.minutes,
-  });
+    })
+    .select('id')
+    .single();
   if (error) throw error;
+  return data.id as string;
+}
+
+export type HandoffState = 'waiting' | 'started' | 'finished';
+
+/** Where a queued hike is: still waiting for the headset, started, or finished. */
+export async function fetchHandoffState(id: string): Promise<HandoffState> {
+  const { data, error } = await supabase.from(TABLE).select('started_at, ended_at').eq('id', id).single();
+  if (error) throw error;
+  if (data.ended_at) return 'finished';
+  return data.started_at ? 'started' : 'waiting';
 }
 
 /** Hikes this headset has finished, newest first. */

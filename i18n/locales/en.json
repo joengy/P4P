@@ -103,9 +103,12 @@
     "pairCurrent": "CONNECTED HEADSET",
     "pairForget": "Disconnect this headset",
     "pairFirst": "Connect a headset",
-    "sentToHeadset": "Ready in your headset",
-    "sentToHeadsetHint": "Put on the headset — this session will be waiting, already set to your pace.",
-    "sendFailed": "Couldn't reach your headset. Check your connection and try again."
+    "sendFailed": "Couldn't reach your headset. Check your connection and try again.",
+    "waitingForHeadset": "Waiting for your headset…",
+    "waitingForHeadsetHint": "Put on the headset and open the hike. This changes as soon as the headset picks the session up.",
+    "headsetStarted": "Started in your headset ✓",
+    "headsetStartedHint": "Your headset has the session, set to your pace. It will show up in You when you finish.",
+    "headsetFinished": "Finished — see it in You"
   },
   "discover": {
     "discoverTitle": "Find your next move",
