@@ -122,9 +122,9 @@ export default function TabsLayout() {
           tabBarStyle: {
             backgroundColor: colors.surface,
             borderTopColor: colors.line,
-            height: 58 + insets.bottom,
-            paddingBottom: insets.bottom + 8,
-            paddingTop: 8,
+            height: 66 + insets.bottom,
+            paddingBottom: insets.bottom + 6,
+            paddingTop: 6,
           },
           tabBarLabelStyle: { fontSize: 10.5, fontWeight: '700' },
         }}
