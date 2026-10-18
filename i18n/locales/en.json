@@ -182,7 +182,9 @@
     "normNoChat": "No pressure to chat",
     "normRestAnytime": "Rest whenever you need",
     "normFamilyWelcome": "Family welcome",
-    "normStayClose": "We stay together"
+    "normStayClose": "We stay together",
+    "tabYourPlans": "Your plans",
+    "tabCircleIdeas": "Circle ideas"
   },
   "mood": {
     "moodTitle": "Take a breath.",

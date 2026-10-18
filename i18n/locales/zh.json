@@ -182,7 +182,9 @@
     "normNoChat": "不强迫交谈",
     "normRestAnytime": "随时可休息",
     "normFamilyWelcome": "欢迎家人",
-    "normStayClose": "我们走在一起"
+    "normStayClose": "我们走在一起",
+    "tabYourPlans": "我的计划",
+    "tabCircleIdeas": "圈子想法"
   },
   "mood": {
     "moodTitle": "深呼吸。",
