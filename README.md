@@ -1,6 +1,7 @@
 # Hoa
 
-A bilingual (EN / 中文) movement and wellbeing app built with Expo and React Native.
+A bilingual (English / 中文) mobile app that supports physical activity through social
+connection, built with Expo, React Native and Supabase.
 
 This repository is the software compendium for the Part IV project report
 *Design, Implementation, and Preliminary Evaluation of Hoa: A Socially Supportive Mobile
@@ -8,27 +9,46 @@ Physical Activity Application* (Joe Nguyen, Project 95, University of Auckland, 
 supervisor Dr Yun Suen Pai). Hoa is the mobile half of the project. The VR hiking game it
 pairs with was built by Dhruv Sawant in a separate repository, `dsaw04/Hiking_Game`.
 
-Screens are file-based routes under [app/](app/), content is served through React Query
-hooks in [data/queries.ts](data/queries.ts), and the Postgres schema lives in Supabase.
-Users sign in with email and password; every screen reads and writes the Supabase backend.
+---
+
+## Contents
+
+1. [Where things in the report live](#where-things-in-the-report-live)
+2. [Two builds: tested and final](#two-builds-tested-and-final)
+3. [Requirements](#requirements)
+4. [Running the tested build (no setup)](#running-the-tested-build-no-setup)
+5. [Running the final build](#running-the-final-build)
+6. [Project layout](#project-layout)
+7. [Troubleshooting](#troubleshooting)
+
+---
 
 ## Where things in the report live
 
 | Report | Code |
 |---|---|
 | Tab screens (Home, Discover, Move, Plan, You) | [app/(tabs)/](app/(tabs)/) |
-| Detail screens, VR pairing, messages | [app/](app/) |
+| Detail screens, VR pairing, messages, sign-in | [app/](app/) |
 | Data-access layer (React Query hooks) | [data/queries.ts](data/queries.ts), [data/catalog.ts](data/catalog.ts), [data/user.ts](data/user.ts) |
 | Database schema and row-level security (ER diagram) | [supabase/migrations/](supabase/migrations/) |
 | Demonstration content and demo account | [supabase/seed.sql](supabase/seed.sql), [supabase/seed_demo.sql](supabase/seed_demo.sql) |
 | App ↔ VR headset bridge | [lib/vrBridge.ts](lib/vrBridge.ts), [docs/vr-bridge.md](docs/vr-bridge.md) |
 | Bilingual support | [i18n/](i18n/), [lib/L.ts](lib/L.ts) |
+| Authentication | [lib/auth.tsx](lib/auth.tsx), [app/(auth)/](app/(auth)/) |
 
-**Build used in the evaluation.** Participants tested the build at commit `5f55024`
-(19 September 2026), which ran on bundled demonstration data with no sign-in. Everything
-after it is the post-evaluation work described in the report's Implementation section
-(sign-in, live database, and the changes made in response to testing). To run the tested
-build: `git checkout 5f55024 && npm install && npm start`.
+## Two builds: tested and final
+
+| | Tested build | Final build |
+|---|---|---|
+| Commit | `5f55024` (19 September 2026) | `main` |
+| Used for | The evaluation with participants | The Implementation section of the report |
+| Data | Bundled demonstration data | Live Supabase database |
+| Sign-in | None | Email and password, or an emailed link |
+| Expo SDK | 54 | 57 |
+| Setup needed | `npm install` only | A Supabase project (see below) |
+
+Everything after `5f55024` is the post-evaluation work in the report: sign-in, the live
+database, and the changes made in response to testing.
 
 ---
 
@@ -37,177 +57,162 @@ build: `git checkout 5f55024 && npm install && npm start`.
 | Tool | Version | Notes |
 |---|---|---|
 | Node.js | 20 LTS or newer | Developed on 22.15.0 |
-| npm | 10+ | Ships with Node (`package-lock.json` is committed, so prefer npm) |
-| Expo Go **or** a dev build | SDK 57 | Expo Go from the App Store / Play Store is enough to start |
+| npm | 10+ | Ships with Node. `package-lock.json` is committed, so use npm |
+| Expo Go **or** a simulator/emulator | Matching the build's SDK | Not needed for the web build |
 | Xcode | 16+ | Only for the iOS simulator |
 | Android Studio | Latest | Only for the Android emulator |
 
-There is no committed `ios/` or `android/` folder — this is a managed Expo project and
-the native projects are generated on demand.
+This is a managed Expo project, so there is no committed `ios/` or `android/` folder; the
+native projects are generated on demand.
+
+The app is designed for a phone. In a desktop browser, narrow the window or use the
+browser's device toolbar to see it at phone width.
 
 ---
 
-## 1. Install
+## Running the tested build (no setup)
+
+The tested build runs on bundled data, so it needs no backend or credentials.
 
 ```bash
-git clone <this-repo-url>
+git clone https://github.com/joengy/P4P.git
+cd P4P
+git checkout 5f55024
+npm install
+npm run web
+```
+
+`npm run ios` and `npm run android` also work and will install the matching Expo Go on the
+simulator. The App Store / Play Store Expo Go only supports the newest SDK, so it cannot
+open this SDK 54 build on a physical phone.
+
+Return to the final build with `git checkout main && npm install`.
+
+---
+
+## Running the final build
+
+### 1. Install
+
+```bash
+git clone https://github.com/joengy/P4P.git
 cd P4P
 npm install
 ```
 
-## 2. Configure the backend
+### 2. Create the database
 
-The app reads and writes everything through Supabase, so it needs a project with the
-migrations and seed applied (section 3). Copy the template and fill in your own project's
-values:
+Create a free project at [supabase.com](https://supabase.com), open its **SQL Editor**, and
+run each file below in order (paste its contents, then **Run**):
+
+| File | Purpose |
+|---|---|
+| `migrations/0001_init.sql` | Tables, row-level security policies, indexes |
+| `migrations/0002_profile_trigger.sql` | Creates a `profiles` row on sign-up |
+| `migrations/0003_lock_down_handle_new_user.sql` | Hardens the sign-up trigger |
+| `migrations/0004_vr_device_sessions.sql` | Bridge table to the VR hike: queued sessions and completions |
+| `migrations/0005_catalogue_slugs.sql` | `slug` ids (r1, d4, v1 …) the app routes by, plus display columns |
+| `migrations/0006_fix_conversation_rls_recursion.sql` | Membership check in a SECURITY DEFINER function (fixes RLS recursion) |
+| `migrations/0007_private_membership_check.sql` | Moves that function out of the API-exposed schema |
+| `migrations/0008_demo_senders_and_chat_display.sql` | `sender_name` for demo-community messages, Messages-list fields |
+| `migrations/0009_bilingual_activity_details.sql` | Activity details become `{en, zh}` jsonb |
+| `seed.sql` | Demonstration catalogue: activities, VR sessions, plans, circle ideas, conversations |
+
+All files are under [supabase/](supabase/). If you have the
+[Supabase CLI](https://supabase.com/docs/guides/local-development), `supabase link
+--project-ref <ref>` followed by `supabase db push` applies the migrations, but the seed
+still has to be run in the SQL Editor.
+
+### 3. Connect the app
 
 ```bash
 cp .env.example .env.local
 ```
 
+Then fill in `.env.local` with the values from **Project Settings → API** in the Supabase
+dashboard:
+
 ```bash
-# .env.local
 EXPO_PUBLIC_SUPABASE_URL=https://<your-project>.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
 ```
 
-Both values come from your Supabase dashboard under **Project Settings → API**.
+Use the anon (publishable) key only, never the `service_role` key. `.env.local` is
+gitignored. Without it, [lib/supabase.ts](lib/supabase.ts) falls back to a placeholder URL
+and the screens will not load.
 
-Notes:
-
-- `.env.local` is gitignored and must stay that way. Only the anon/publishable key
-  belongs here — never the `service_role` key, which bypasses row-level security.
-- The `EXPO_PUBLIC_` prefix is what makes these readable from client code; Expo inlines
-  them into the bundle at build time, so treat anything in this file as public.
-- Restart the dev server after editing `.env.local` — env vars are read at bundle time,
-  not on hot reload.
-
-Without valid credentials [lib/supabase.ts](lib/supabase.ts) falls back to a placeholder
-URL and every screen will fail to load.
-
-## 3. Set up the database
-
-Apply the migrations in [supabase/migrations/](supabase/migrations/) in filename order,
-then optionally load the catalog seed data:
-
-| File | Purpose |
-|---|---|
-| `0001_init.sql` | Tables, row-level security policies, indexes |
-| `0002_profile_trigger.sql` | Creates a `profiles` row on user signup |
-| `0003_lock_down_handle_new_user.sql` | Hardens the signup trigger |
-| `0004_vr_device_sessions.sql` | Bridge table to the Unity VR hike — queued sessions + completions |
-| `0005_catalogue_slugs.sql` | `slug` ids (r1, d4, v1 …) the app routes by, plus display columns |
-| `0006_fix_conversation_rls_recursion.sql` | Membership check in a SECURITY DEFINER function (fixes RLS recursion) |
-| `0007_private_membership_check.sql` | Moves that function out of the API-exposed schema |
-| `0008_demo_senders_and_chat_display.sql` | `sender_name` for demo-community messages, Messages-list fields |
-| `0009_bilingual_activity_details.sql` | Activity details become `{en, zh}` jsonb |
-| `seed.sql` | Public catalog content — activities, VR sessions, plans, circle ideas, conversations |
-| `seed_demo.sql` | History, chats, RSVPs and memberships for the demo account |
-
-The quickest route is the SQL editor in the Supabase dashboard: paste each file's
-contents and run them in order. With the [Supabase CLI](https://supabase.com/docs/guides/local-development)
-installed you can instead run:
-
-```bash
-supabase link --project-ref <your-project-ref>
-supabase db push
-```
-
-`seed.sql` inserts only content that is visible without a login. Personal and social
-rows (check-ins, saved items, messages, RSVPs) are foreign-keyed to `auth.users` under
-RLS, so `seed_demo.sql` attaches them to the demo account, which must exist first (sign
-it up through the app or Auth). The account's email is set on line 8 of the file; change
-it to the account you signed up with. It clears that account's rows before inserting, so
-it can be re-run to reset the demo.
-
-## 4. Run it
+### 4. Run it
 
 ```bash
 npm start
 ```
 
-Then press `i` for the iOS simulator, `a` for Android, or `w` for web — or scan the QR
-code with Expo Go on a physical device. You can also jump straight to a platform:
+Press `w` for web, `i` for the iOS simulator or `a` for Android, or scan the QR code with
+Expo Go on a phone. `npm run web`, `npm run ios` and `npm run android` jump straight to a
+platform.
 
-| Command | What it does |
-|---|---|
-| `npm start` | Starts the Metro dev server with the interactive menu |
-| `npm run ios` | Starts and opens the iOS simulator |
-| `npm run android` | Starts and opens the Android emulator |
-| `npm run web` | Starts and opens the web build |
+### 5. Sign up and load the demo account (optional)
 
-The app opens on the sign-in screen, then the Home tab.
+Create an account from the app's sign-up screen. Supabase sends a confirmation email by
+default; confirm it, or turn off **Confirm email** under **Authentication → Sign In /
+Providers** first.
+
+A new account starts empty. To give it the movement history, chats and RSVPs that
+participants saw during testing, change the email on line 8 of
+[supabase/seed_demo.sql](supabase/seed_demo.sql) to your account's email and run the file
+in the SQL Editor. It clears that account's rows first, so it can be re-run to reset the
+demo.
 
 ---
 
 ## Project layout
 
 ```
-app/                    Expo Router screens — every file is a route
-  (tabs)/               the five tab screens (home, discover, move, plan, you)
-  activity/ vr/ plan/   stack + modal detail routes
-  fit/ ask/ session/
-  share/ messages/
+app/                    Expo Router screens; every file is a route
+  (auth)/               sign-in and sign-up
+  (tabs)/               the five tabs: Home (index), Discover, Move, Plan, You
+  activity/ vr/ plan/   detail screens
+  fit/ ask/ session/ share/ messages/
+  mood.tsx pair.tsx     mood check-in and VR headset pairing
 components/
-  ui/                   design-system primitives (Btn, Card, Tag, Avatar, Photo…)
-  move/                 Move-tab specific composites
-constants/theme.ts      colors, spacing, type scale
+  ui/                   shared primitives (Btn, Card, Tag, Avatar, Photo …)
+  home/ discover/ move/ plan/ you/ messages/ sheets/
+                        screen-specific components
+constants/theme.ts      colours, spacing, type scale
 data/
-  queries.ts            React Query hooks — the single data-access surface
-  catalog.ts            public catalogue reads + row→type mappers
-  user.ts               per-user reads and writes (saved, RSVPs, check-ins, chats, history)
-  mock/                 shared types and fixed UI config (filters, moods, stickers, tips)
-i18n/                   i18next setup + en/zh locale JSON
+  queries.ts            React Query hooks, the only data-access surface for screens
+  catalog.ts            public catalogue reads and row-to-type mappers
+  user.ts               per-user reads and writes (saved items, RSVPs, check-ins, chats, history)
+  mock/                 shared types and fixed UI config (filters, moods, stickers)
+i18n/                   i18next setup and the en/zh locale files
 lib/
   supabase.ts           Supabase client
-  auth.tsx              AuthProvider / useAuth (session state)
-  vrBridge.ts           phone half of the VR headset bridge
-  L.ts                  Bilingual<T> resolver — L(node, lang)
-store/device.ts         paired headset code, persisted to AsyncStorage
+  auth.tsx              AuthProvider and useAuth (session state)
+  vrBridge.ts           phone side of the VR headset bridge
+  L.ts                  resolves bilingual { en, zh } content for the current language
+store/device.ts         paired headset code, persisted on the device
 supabase/               SQL migrations and seed data
+docs/vr-bridge.md       how the app and the VR game exchange sessions
 ```
 
-### Conventions worth knowing
+Notes for reading the code:
 
-- **Path alias.** `@/*` maps to the repo root, so imports read `@/lib/supabase`, not
-  `../../lib/supabase`. Configured in [tsconfig.json](tsconfig.json).
-- **Typed routes** are on (`experiments.typedRoutes` in [app.json](app.json)), so route
-  strings are type-checked. Run the dev server once after adding a route to regenerate
-  the types.
-- **Bilingual content** is stored as `{ en, zh }` objects and read through `L()` from
-  [lib/L.ts](lib/L.ts), matching the `jsonb` columns in Postgres.
-- **Data access goes through [data/queries.ts](data/queries.ts).** Screens call hooks
-  like `useHomeRecs()` and never touch the Supabase client directly. Rows are mapped onto
-  the types in [data/mock/types.ts](data/mock/types.ts) by [data/catalog.ts](data/catalog.ts)
-  and [data/user.ts](data/user.ts).
-- **New Architecture** is enabled. Check compatibility before adding native modules.
+- `@/` maps to the repository root, so imports read `@/lib/supabase`.
+- Bilingual content is stored as `{ en, zh }` objects (jsonb in Postgres) and read
+  through `L()` in [lib/L.ts](lib/L.ts).
+- Screens never call Supabase directly; they use the hooks in
+  [data/queries.ts](data/queries.ts), which map rows onto the types in
+  [data/mock/types.ts](data/mock/types.ts).
+
+Type-check with `npx tsc --noEmit` (strict mode).
 
 ---
 
-## Type checking
-
-```bash
-npx tsc --noEmit
-```
-
-TypeScript runs in strict mode.
-
 ## Troubleshooting
 
-**Stale bundle or odd module errors** — clear the Metro cache:
-
-```bash
-npx expo start --clear
-```
-
-**Dependency versions drift out of range** after adding packages:
-
-```bash
-npx expo install --check
-```
-
-Always install Expo-managed packages with `npx expo install <pkg>` rather than
-`npm install`, so versions stay aligned with the SDK.
-
-**Env vars not picked up** — confirm the variable name starts with `EXPO_PUBLIC_`, then
-fully restart the dev server.
+- **Stale bundle or odd module errors:** `npx expo start --clear`.
+- **Changes to `.env.local` not picked up:** fully stop and restart the dev server; the
+  variables are read at bundle time.
+- **Screens stuck loading or empty:** check `.env.local` and that every migration and
+  `seed.sql` ran without errors.
+- **Dependency version warnings:** `npx expo install --check`.
