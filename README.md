@@ -7,7 +7,7 @@ This repository is the software compendium for the Part IV project report
 *Design, Implementation, and Preliminary Evaluation of Hoa: A Socially Supportive Mobile
 Physical Activity Application* (Joe Nguyen, Project 95, University of Auckland, 2026;
 supervisor Dr Yun Suen Pai). Hoa is the mobile half of the project. The VR hiking game it
-pairs with was built by Dhruv Sawant in a separate repository, `dsaw04/Hiking_Game`.
+pairs with was built by Dhruv Sawant in a separate repository, [`dsaw04/Hoa_XR_Hiking_Game`](https://github.com/dsaw04/Hoa_XR_Hiking_Game).
 
 ---
 

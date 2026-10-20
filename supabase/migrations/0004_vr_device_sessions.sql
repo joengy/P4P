@@ -1,4 +1,4 @@
--- Bridge between the phone app and the Unity VR hike (dsaw04/Hiking_Game).
+-- Bridge between the phone app and the Unity VR hike (dsaw04/Hoa_XR_Hiking_Game).
 --
 -- One row = one hike. The app inserts it (which session, how hard, how long),
 -- the headset claims it at launch, pre-fills its in-VR check-in from it, and

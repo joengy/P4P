@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase';
 import type { Bilingual } from '@/lib/L';
 import type { HistoryItem } from '@/data/mock';
 
-// The phone half of the bridge to the Unity VR hike (dsaw04/Hiking_Game).
+// The phone half of the bridge to the Unity VR hike (dsaw04/Hoa_XR_Hiking_Game).
 //
 // Both ends talk to one table, vr_device_sessions (migration 0004). The app
 // inserts a row when the player taps "Start session"; the headset claims it at

@@ -1,6 +1,6 @@
 # App ↔ VR bridge
 
-How the Hoa phone app and the Unity hike (`dsaw04/Hiking_Game`) talk to each other.
+How the Hoa phone app and the Unity hike (`dsaw04/Hoa_XR_Hiking_Game`) talk to each other.
 
 The two run on different devices, so there is no deep link or intent that can reach across.
 They share one Supabase table instead. Nothing is real-time: the app queues a hike, the
