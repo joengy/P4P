@@ -2,9 +2,33 @@
 
 A bilingual (EN / 中文) movement and wellbeing app built with Expo and React Native.
 
+This repository is the software compendium for the Part IV project report
+*Design, Implementation, and Preliminary Evaluation of Hoa: A Socially Supportive Mobile
+Physical Activity Application* (Joe Nguyen, Project 95, University of Auckland, 2026;
+supervisor Dr Yun Suen Pai). Hoa is the mobile half of the project. The VR hiking game it
+pairs with was built by Dhruv Sawant in a separate repository, `dsaw04/Hiking_Game`.
+
 Screens are file-based routes under [app/](app/), content is served through React Query
 hooks in [data/queries.ts](data/queries.ts), and the Postgres schema lives in Supabase.
 Users sign in with email and password; every screen reads and writes the Supabase backend.
+
+## Where things in the report live
+
+| Report | Code |
+|---|---|
+| Tab screens (Home, Discover, Move, Plan, You) | [app/(tabs)/](app/(tabs)/) |
+| Detail screens, VR pairing, messages | [app/](app/) |
+| Data-access layer (React Query hooks) | [data/queries.ts](data/queries.ts), [data/catalog.ts](data/catalog.ts), [data/user.ts](data/user.ts) |
+| Database schema and row-level security (ER diagram) | [supabase/migrations/](supabase/migrations/) |
+| Demonstration content and demo account | [supabase/seed.sql](supabase/seed.sql), [supabase/seed_demo.sql](supabase/seed_demo.sql) |
+| App ↔ VR headset bridge | [lib/vrBridge.ts](lib/vrBridge.ts), [docs/vr-bridge.md](docs/vr-bridge.md) |
+| Bilingual support | [i18n/](i18n/), [lib/L.ts](lib/L.ts) |
+
+**Build used in the evaluation.** Participants tested the build at commit `5f55024`
+(19 September 2026), which ran on bundled demonstration data with no sign-in. Everything
+after it is the post-evaluation work described in the report's Implementation section
+(sign-in, live database, and the changes made in response to testing). To run the tested
+build: `git checkout 5f55024 && npm install && npm start`.
 
 ---
 
@@ -14,7 +38,7 @@ Users sign in with email and password; every screen reads and writes the Supabas
 |---|---|---|
 | Node.js | 20 LTS or newer | Developed on 22.15.0 |
 | npm | 10+ | Ships with Node (`package-lock.json` is committed, so prefer npm) |
-| Expo Go **or** a dev build | SDK 54 | Expo Go from the App Store / Play Store is enough to start |
+| Expo Go **or** a dev build | SDK 57 | Expo Go from the App Store / Play Store is enough to start |
 | Xcode | 16+ | Only for the iOS simulator |
 | Android Studio | Latest | Only for the Android emulator |
 
@@ -92,8 +116,9 @@ supabase db push
 `seed.sql` inserts only content that is visible without a login. Personal and social
 rows (check-ins, saved items, messages, RSVPs) are foreign-keyed to `auth.users` under
 RLS, so `seed_demo.sql` attaches them to the demo account, which must exist first (sign
-it up through the app or Auth). It clears that account's rows before inserting, so it can
-be re-run to reset the demo.
+it up through the app or Auth). The account's email is set on line 8 of the file; change
+it to the account you signed up with. It clears that account's rows before inserting, so
+it can be re-run to reset the demo.
 
 ## 4. Run it
 

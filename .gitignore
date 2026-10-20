@@ -57,6 +57,7 @@ service-account*.json
 # No markdown in the repo except the README.
 *.md
 !README.md
+!docs/*.md
 
 # One-off database dumps (the real schema lives in supabase/migrations/)
 hoa_schema_export.sql
@@ -67,3 +68,11 @@ hoa_schema_export.sql
 # generated native folders
 /ios
 /android
+
+# Report drafts live outside the compendium
+report_latex/
+report_latex*.zip
+report_figures/
+
+# Personal Claude Code settings
+.claude/
